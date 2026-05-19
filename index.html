@@ -408,13 +408,7 @@ if __name__ == "__main__":
       <h2 class="section-header">Get Started</h2>
 
       <p style="margin-bottom: 0.75rem; font-weight: bold;">1. Install LiveFolders:</p>
-      <div style="position: relative; margin-bottom: 1.5rem;">
-        <div class="code-box" id="install-cmd">curl -fsSL https://raw.githubusercontent.com/natanloterio/LiveFolders/master/install.sh | bash</div>
-        <button id="copy-btn" onclick="copyInstall()"
-          style="position: absolute; top: 0.5rem; right: 0.5rem; font-family: 'Courier New', monospace;
-                 font-size: 0.8rem; background: #333; color: #0F0; border: 1px solid #0F0;
-                 padding: 0.2rem 0.5rem; cursor: pointer;">[COPY]</button>
-      </div>
+      <div class="code-box" style="margin-bottom: 1.5rem;">curl -fsSL https://raw.githubusercontent.com/natanloterio/LiveFolders/master/install.sh | bash</div>
 
       <p style="margin-bottom: 0.5rem; font-weight: bold;">Prerequisites:</p>
       <table style="margin-bottom: 1.5rem; width: auto;">
@@ -490,18 +484,39 @@ cargo install --git https://github.com/natanloterio/LiveFolders</div>
   </footer>
 
   <script>
-    function copyInstall() {
-      const cmd = 'curl -fsSL https://raw.githubusercontent.com/natanloterio/LiveFolders/master/install.sh | bash';
-      const btn = document.getElementById('copy-btn');
-      if (!btn) return;
-      navigator.clipboard.writeText(cmd).then(() => {
-        btn.textContent = '[COPIED!]';
-        setTimeout(() => btn.textContent = '[COPY]', 2000);
-      }).catch(() => {
-        btn.textContent = '[FAILED]';
-        setTimeout(() => btn.textContent = '[COPY]', 2000);
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('.code-box').forEach(function (box) {
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'position:relative;';
+        box.parentNode.insertBefore(wrapper, box);
+        wrapper.appendChild(box);
+
+        const btn = document.createElement('button');
+        btn.textContent = '[COPY]';
+        btn.style.cssText = [
+          'position:absolute', 'top:0.4rem', 'right:0.4rem',
+          'font-family:"Courier New",monospace', 'font-size:0.75rem',
+          'background:#222', 'color:#0F0', 'border:1px solid #0F0',
+          'padding:0.15rem 0.4rem', 'cursor:pointer', 'opacity:0',
+          'transition:opacity 0.15s'
+        ].join(';');
+
+        wrapper.addEventListener('mouseenter', function () { btn.style.opacity = '1'; });
+        wrapper.addEventListener('mouseleave', function () { btn.style.opacity = '0'; });
+
+        btn.addEventListener('click', function () {
+          navigator.clipboard.writeText(box.textContent).then(function () {
+            btn.textContent = '[COPIED!]';
+            setTimeout(function () { btn.textContent = '[COPY]'; }, 2000);
+          }).catch(function () {
+            btn.textContent = '[FAILED]';
+            setTimeout(function () { btn.textContent = '[COPY]'; }, 2000);
+          });
+        });
+
+        wrapper.appendChild(btn);
       });
-    }
+    });
   </script>
 </body>
 </html>
