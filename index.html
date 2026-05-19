@@ -9,7 +9,7 @@
 </head>
 <body>
   <div style="background: #000080; color: #FFD700; padding: 0.3rem 0; overflow: hidden; white-space: nowrap; font-family: 'Courier New', monospace; font-size: 0.85rem;">
-    <marquee>&#x2605; LiveFolders v0.5.1 &mdash; Expose tools to LLMs via plain files &mdash; No SDK required &mdash; Works with Claude Code &mdash; Apache 2.0 &mdash; Star us on GitHub! &#x2605;</marquee>
+    <marquee>&#x2605; LiveFolders &mdash; Expose tools to LLMs via plain files &mdash; No SDK required &mdash; New: Input validation &amp; structured errors &mdash; Works with Claude Code &mdash; Apache 2.0 &mdash; Star us on GitHub! &#x2605;</marquee>
   </div>
 
   <!-- HERO -->
@@ -133,6 +133,18 @@
           <h3>&#x1fa7a; livefolders doctor</h3>
           <p>Built-in diagnostic command. Checks FUSE installation, your config file,
           and every installed tool&apos;s <code>folder.yaml</code>. Prints actionable fixes.</p>
+        </div>
+        <div class="feature-card" style="background: #F0FFF0;">
+          <h3>&#x2705; Input Validation</h3>
+          <p>Add <code>input: type: json</code> to any endpoint — invalid input is rejected
+          before your handler runs. Supports <code>json</code>, <code>string</code>, and <code>none</code>.
+          The generated <code>how_to.md</code> documents it automatically.</p>
+        </div>
+        <div class="feature-card" style="background: #FFF5E6;">
+          <h3>&#x1f4cb; Structured Errors</h3>
+          <p>All failures return <code>[ERROR:CODE] message</code> &mdash; parseable by LLMs and scripts.
+          Codes: <code>INVALID_INPUT</code>, <code>HANDLER</code>, <code>TIMEOUT</code>,
+          <code>SPAWN</code>, <code>PROCESS</code>.</p>
         </div>
       </div>
     </div>
