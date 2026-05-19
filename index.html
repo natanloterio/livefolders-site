@@ -129,6 +129,58 @@
   <hr>
 
   <!-- VS MCP -->
+  <section>
+    <div class="container">
+      <h2 class="section-header">LiveFolders vs MCP</h2>
+      <p style="margin-bottom: 1rem;">
+        MCP (Model Context Protocol) is the leading alternative. Both approaches are valid &mdash;
+        the right choice depends on your environment.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Criterion</th>
+            <th>LiveFolders</th>
+            <th>MCP</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Setup</td>
+            <td style="background:#F0FFF0;"><strong>6-line YAML, no runtime</strong></td>
+            <td>Python + package install required</td>
+          </tr>
+          <tr>
+            <td>Hot-Reload</td>
+            <td style="background:#F0FFF0;"><strong>~1s, no restart</strong></td>
+            <td>Server restart + reconnect (~1&ndash;3s)</td>
+          </tr>
+          <tr>
+            <td>Publishing</td>
+            <td style="background:#F0FFF0;"><strong>One GitHub URL, no registry</strong></td>
+            <td>No official registry; manual setup</td>
+          </tr>
+          <tr>
+            <td>LLM Compatibility</td>
+            <td>Shell-capable agents (Claude Code, etc.)</td>
+            <td style="background:#F0FFF0;"><strong>Any MCP-native host client</strong></td>
+          </tr>
+          <tr>
+            <td>Input Validation</td>
+            <td>Handler must validate manually</td>
+            <td style="background:#F0FFF0;"><strong>JSON schema enforced</strong></td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin-top: 0.75rem; font-style: italic; font-size: 0.9rem;">
+        Neither is universally better.
+        <a href="https://github.com/natanloterio/LiveFolders/blob/master/docs/livefoldersfs-vs-mcp.md" target="_blank" rel="noopener">
+          Read the full comparison &rarr;
+        </a>
+      </p>
+    </div>
+  </section>
+  <hr>
 
   <!-- INSTALL -->
 
