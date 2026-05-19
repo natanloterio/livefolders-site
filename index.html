@@ -9,7 +9,7 @@
 </head>
 <body>
   <div style="background: #000080; color: #FFD700; padding: 0.3rem 0; overflow: hidden; white-space: nowrap; font-family: 'Courier New', monospace; font-size: 0.85rem;">
-    <marquee>&#x2605; LiveFolders &mdash; Expose tools to LLMs via plain files &mdash; No SDK required &mdash; New: Input validation &amp; structured errors &mdash; Works with Claude Code &mdash; Apache 2.0 &mdash; Star us on GitHub! &#x2605;</marquee>
+    <marquee>&#x2605; LiveFolders v0.9.0 &mdash; Expose tools to LLMs via plain files &mdash; New: declarative pipelines, stateful locking, schema discovery, structural validation &mdash; Works with Claude Code &mdash; Apache 2.0 &mdash; Star us on GitHub! &#x2605;</marquee>
   </div>
 
   <!-- HERO -->
@@ -136,15 +136,36 @@
         </div>
         <div class="feature-card" style="background: #F0FFF0;">
           <h3>&#x2705; Input Validation</h3>
-          <p>Add <code>input: type: json</code> to any endpoint — invalid input is rejected
-          before your handler runs. Supports <code>json</code>, <code>string</code>, and <code>none</code>.
-          The generated <code>how_to.md</code> documents it automatically.</p>
+          <p>Declare constraints on any endpoint: <code>min_length</code>, <code>max_length</code>,
+          <code>pattern</code> for strings; a <code>schema:</code> block with required fields and
+          property types for JSON. Invalid input is rejected before the handler runs.
+          Auto-documented in <code>how_to.md</code>.</p>
         </div>
         <div class="feature-card" style="background: #FFF5E6;">
-          <h3>&#x1f4cb; Structured Errors</h3>
-          <p>All failures return <code>[ERROR:CODE] message</code> &mdash; parseable by LLMs and scripts.
-          Codes: <code>INVALID_INPUT</code>, <code>HANDLER</code>, <code>TIMEOUT</code>,
-          <code>SPAWN</code>, <code>PROCESS</code>.</p>
+          <h3>&#x1f4cb; Structured Errors &amp; Logs</h3>
+          <p>All failures return <code>[ERROR:CODE] message</code> (5 parseable codes).
+          Each endpoint also exposes a companion <code>&lt;endpoint&gt;.log</code> file recording
+          <code>duration_ms</code> and <code>stderr</code> from the last run &mdash;
+          readable with <code>cat forecast.log</code>.</p>
+        </div>
+        <div class="feature-card" style="background: #E8F4FD;">
+          <h3>&#x1f4be; Stateful Tools</h3>
+          <p>Declare <code>state_file: /path/to/state.db</code> in <code>folder.yaml</code>.
+          The runtime holds an exclusive POSIX lock (<code>flock</code>) for the duration of each
+          call and injects <code>LIVEFOLDERS_STATE_FILE</code> &mdash; no handler-side locking needed.</p>
+        </div>
+        <div class="feature-card" style="background: #FDF0FF;">
+          <h3>&#x1f517; Declarative Pipelines</h3>
+          <p>Add <code>pipe: [stage1, stage2]</code> to chain endpoints &mdash; stdout of each
+          stage becomes stdin of the next, in a single LLM write. Per-stage schema validation
+          runs before each handler. Any stage error stops the pipeline immediately.</p>
+        </div>
+        <div class="feature-card" style="background: #F5FFF5;">
+          <h3>&#x1f50d; Schema Discovery</h3>
+          <p>A virtual <code>schema.json</code> mirrors MCP&apos;s <code>list_tools</code> format:
+          tool names, descriptions, endpoint kinds, and full input constraints &mdash;
+          machine-readable by any MCP-aware client or script, alongside the human-readable
+          <code>how_to.md</code>.</p>
         </div>
       </div>
     </div>
@@ -171,32 +192,47 @@
           <tr>
             <td>Setup</td>
             <td style="background:#F0FFF0;"><strong>6-line YAML, no runtime</strong></td>
-            <td>Python + package install required</td>
+            <td>Python server + package install required</td>
           </tr>
           <tr>
             <td>Hot-Reload</td>
             <td style="background:#F0FFF0;"><strong>~1s, no restart</strong></td>
-            <td>Server restart + reconnect (~1&ndash;3s)</td>
+            <td>Server kill + restart + reconnect (~1&ndash;3s)</td>
           </tr>
           <tr>
             <td>Publishing</td>
             <td style="background:#F0FFF0;"><strong>One GitHub URL, no registry</strong></td>
-            <td>No official registry; manual setup</td>
+            <td>No official registry; npm/PyPI or manual config</td>
           </tr>
           <tr>
-            <td>LLM Compatibility</td>
-            <td>Shell-capable agents (Claude Code, etc.)</td>
-            <td style="background:#F0FFF0;"><strong>Any MCP-native host client</strong></td>
+            <td>Discoverability</td>
+            <td style="background:#F0FFF0;"><strong>Human <code>how_to.md</code> + machine <code>schema.json</code></strong> (mirrors <code>list_tools</code>)</td>
+            <td>Typed JSON schema via <code>list_tools</code> (protocol-only)</td>
           </tr>
           <tr>
-            <td>Input Validation</td>
-            <td style="background:#F0FFF0;"><strong>Opt-in per-endpoint (<code>input: type: json</code>)</strong> &mdash; rejects bad input before handler runs</td>
-            <td>Schema enforced unconditionally at protocol layer</td>
+            <td>Stateful Tools</td>
+            <td style="background:#F0FFF0;"><strong>Durable file state + <code>flock</code> locking</strong> &mdash; survives restarts, no handler-side coordination</td>
+            <td>In-process memory &mdash; fast but lost on server restart</td>
+          </tr>
+          <tr>
+            <td>Composability</td>
+            <td style="background:#F0FFF0;"><strong>Declarative <code>pipe:</code> chains</strong> &mdash; stdout&rarr;stdin in one LLM write, per-stage validation</td>
+            <td>Python function calls within one server; cross-server needs LLM orchestration</td>
           </tr>
           <tr>
             <td>Observability</td>
-            <td style="background:#F0FFF0;"><strong><code>[ERROR:CODE] message</code></strong> &mdash; 5 parseable codes for LLMs and scripts</td>
+            <td style="background:#F0FFF0;"><strong><code>[ERROR:CODE] message</code> + <code>&lt;endpoint&gt;.log</code></strong> with timing &amp; stderr per invocation</td>
             <td>Typed exception objects with stack context</td>
+          </tr>
+          <tr>
+            <td>LLM Compatibility</td>
+            <td>Shell-capable agents (Claude Code, POSIX environments)</td>
+            <td style="background:#F0FFF0;"><strong>Any MCP-native host</strong> incl. web clients</td>
+          </tr>
+          <tr>
+            <td>Input Validation</td>
+            <td>Opt-in per-endpoint: <code>min_length</code>, <code>max_length</code>, <code>pattern</code>, JSON <code>schema:</code></td>
+            <td style="background:#F0FFF0;"><strong>Unconditional at protocol layer</strong> &mdash; every tool validated automatically</td>
           </tr>
         </tbody>
       </table>
