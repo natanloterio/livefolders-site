@@ -99,6 +99,34 @@
   <hr>
 
   <!-- KEY FEATURES -->
+  <section>
+    <div class="container">
+      <h2 class="section-header">Key Features</h2>
+      <div class="feature-grid">
+        <div class="feature-card" style="background: #E0FFFF;">
+          <h3>&#x26a1; Hot-Reload</h3>
+          <p>Edit <code>folder.yaml</code> or a handler script &mdash; changes take effect in ~1 second.
+          No restart. No reconnect. The watcher picks it up automatically.</p>
+        </div>
+        <div class="feature-card" style="background: #FFFACD;">
+          <h3>&#x23f1; Handler Timeouts</h3>
+          <p>A hung tool is killed after a configurable timeout (default: 30s).
+          The endpoint returns an error string. The filesystem never freezes.</p>
+        </div>
+        <div class="feature-card" style="background: #FFE4E1;">
+          <h3>&#x1f511; Secret Management</h3>
+          <p>Declare required env vars in <code>folder.yaml</code>. Users are prompted
+          at install time. Secrets are stored in <code>secrets.env</code> and loaded on every mount.</p>
+        </div>
+        <div class="feature-card" style="background: #E6E6FA;">
+          <h3>&#x1fa7a; livefolders doctor</h3>
+          <p>Built-in diagnostic command. Checks FUSE installation, your config file,
+          and every installed tool&apos;s <code>folder.yaml</code>. Prints actionable fixes.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <hr>
 
   <!-- VS MCP -->
 

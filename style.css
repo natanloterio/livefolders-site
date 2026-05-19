@@ -103,6 +103,24 @@ section { padding: 2.5rem 0; }
   .blink { animation: none; }
 }
 
+/* === Feature Grid === */
+.feature-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.feature-card {
+  border: 4px solid #111;
+  padding: 1rem 1.25rem;
+}
+.feature-card h3 {
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+  border-bottom: 2px solid #111;
+  padding-bottom: 0.3rem;
+}
+
 /* === Mobile === */
 @media (max-width: 640px) {
   .two-col { display: block; }
