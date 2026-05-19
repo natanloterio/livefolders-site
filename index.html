@@ -9,7 +9,7 @@
 </head>
 <body>
   <div style="background: #000080; color: #FFD700; padding: 0.3rem 0; overflow: hidden; white-space: nowrap; font-family: 'Courier New', monospace; font-size: 0.85rem;">
-    <marquee>&#x2605; LiveFolders v0.9.0 &mdash; Expose tools to LLMs via plain files &mdash; New: declarative pipelines, stateful locking, schema discovery, structural validation &mdash; Works with Claude Code &mdash; Apache 2.0 &mdash; Star us on GitHub! &#x2605;</marquee>
+    <marquee>&#x2605; LiveFolders v0.9.2 &mdash; Expose tools to LLMs via plain files &mdash; New: agent auto-setup (Claude Code / Cursor / Copilot), LLM tool-authoring via create_tool.md &mdash; Apache 2.0 &mdash; Star us on GitHub! &#x2605;</marquee>
   </div>
 
   <!-- HERO -->
@@ -74,7 +74,7 @@
   <section>
     <div class="container">
       <h2 class="section-header">Quick Start</h2>
-      <div class="code-box"># 1. Create a config file
+      <div class="code-box"># 1. Create a config file (offers to set up CLAUDE.md / AGENTS.md / Copilot automatically)
 livefolders init
 
 # 2. Install a tool from GitHub
@@ -98,10 +98,19 @@ livefolders stop</div>
   <!-- GIVING TOOLS TO CLAUDE CODE -->
   <section>
     <div class="container">
-      <h2 class="section-header">Giving Tools to Claude Code</h2>
-      <p style="margin-bottom: 1rem;">
-        Add this to your project&apos;s <code>CLAUDE.md</code> — Claude Code will discover and use all mounted tools automatically:
+      <h2 class="section-header">Giving Tools to Your Agent</h2>
+      <p style="margin-bottom: 0.75rem;">
+        <strong><code>livefolders init</code> does this automatically</strong> &mdash; it detects your agent and writes the snippet to the right file:
       </p>
+      <table style="margin-bottom: 1.25rem; width: auto;">
+        <thead><tr><th>Agent</th><th>File written</th></tr></thead>
+        <tbody>
+          <tr><td>Claude Code</td><td><code>CLAUDE.md</code></td></tr>
+          <tr><td>Cursor / Windsurf / Aider</td><td><code>AGENTS.md</code></td></tr>
+          <tr><td>GitHub Copilot</td><td><code>.github/copilot-instructions.md</code></td></tr>
+        </tbody>
+      </table>
+      <p style="margin-bottom: 0.5rem;">Or paste it manually into any agent&apos;s instruction file:</p>
       <div class="code-box" style="margin-bottom: 1.25rem;">## Tools
 
 LiveFolders is mounted at `.livefolders/tools/`. Before using any tool:
@@ -109,7 +118,15 @@ LiveFolders is mounted at `.livefolders/tools/`. Before using any tool:
 2. `cat .livefolders/tools/&lt;name&gt;/how_to.md` to read usage instructions
 3. Write input with `echo "..." &gt; .livefolders/tools/&lt;name&gt;/&lt;endpoint&gt;`
 4. Read output with `cat .livefolders/tools/&lt;name&gt;/&lt;endpoint&gt;`</div>
-      <p style="margin-bottom: 0.75rem; font-weight: bold;">Claude then follows this sequence on its own:</p>
+      <div class="pixel-box" style="background: #F0FFF0; margin-bottom: 1.25rem;">
+        <strong>&#x1f4d6; LLMs can also author new tools from inside the filesystem.</strong>
+        A virtual <code>create_tool.md</code> is mounted at the filesystem root &mdash; it contains
+        the complete <code>folder.yaml</code> reference: file types, input validation, secrets,
+        state, and pipelines. An LLM reads it and writes a working tool without ever leaving
+        the mounted filesystem:<br><br>
+        <code>cat .livefolders/create_tool.md</code>
+      </div>
+      <p style="margin-bottom: 0.75rem; font-weight: bold;">The agent then follows this sequence on its own:</p>
       <table role="presentation" class="two-col" style="border: none;">
         <tr>
           <td style="border: none; width: 50%; vertical-align: top; padding-right: 1rem;">
