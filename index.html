@@ -183,6 +183,64 @@
   <hr>
 
   <!-- INSTALL -->
+  <section id="install">
+    <div class="container">
+      <h2 class="section-header">Get Started</h2>
+
+      <p style="margin-bottom: 0.75rem; font-weight: bold;">1. Install LiveFolders:</p>
+      <div style="position: relative; margin-bottom: 1.5rem;">
+        <div class="code-box" id="install-cmd">curl -fsSL https://raw.githubusercontent.com/natanloterio/LiveFolders/master/install.sh | bash</div>
+        <button id="copy-btn" onclick="copyInstall()"
+          style="position: absolute; top: 0.5rem; right: 0.5rem; font-family: 'Courier New', monospace;
+                 font-size: 0.8rem; background: #333; color: #0F0; border: 1px solid #0F0;
+                 padding: 0.2rem 0.5rem; cursor: pointer;">[COPY]</button>
+      </div>
+
+      <p style="margin-bottom: 0.5rem; font-weight: bold;">Prerequisites:</p>
+      <table style="margin-bottom: 1.5rem; width: auto;">
+        <thead><tr><th>Platform</th><th>Requirement</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Linux</td>
+            <td><code>sudo apt-get install fuse3</code></td>
+          </tr>
+          <tr>
+            <td>macOS</td>
+            <td><a href="https://osxfuse.github.io" target="_blank" rel="noopener">macFUSE</a> &mdash; install the .pkg from osxfuse.github.io</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p style="margin-bottom: 0.75rem; font-weight: bold;">2. Quick start:</p>
+      <div class="code-box" style="margin-bottom: 1.5rem;"># Create config
+livefolders init
+
+# Install an example tool
+livefolders install github.com/natanloterio/LiveFolders/tree/master/examples/users
+
+# Mount (runs in background)
+livefolders mount
+
+# Use it
+cat .livefolders/tools/users/list
+
+# Stop
+livefolders stop</div>
+
+      <details style="border: 3px solid #111; padding: 0.75rem; background: #F5F5F5;">
+        <summary style="cursor: pointer; font-weight: bold; font-family: 'Courier New', monospace;">
+          Manual install / from source
+        </summary>
+        <div class="code-box" style="margin-top: 0.75rem;"># Linux x86_64
+curl -L https://github.com/natanloterio/LiveFolders/releases/latest/download/livefolders-linux-x86_64 -o livefolders
+chmod +x livefolders &amp;&amp; sudo mv livefolders /usr/local/bin/
+
+# From source (requires Rust)
+cargo install --git https://github.com/natanloterio/LiveFolders</div>
+      </details>
+    </div>
+  </section>
+  <hr>
 
   <!-- FOOTER -->
 
