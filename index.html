@@ -190,8 +190,13 @@
           </tr>
           <tr>
             <td>Input Validation</td>
-            <td>Handler must validate manually</td>
-            <td style="background:#F0FFF0;"><strong>JSON schema enforced</strong></td>
+            <td style="background:#F0FFF0;"><strong>Opt-in per-endpoint (<code>input: type: json</code>)</strong> &mdash; rejects bad input before handler runs</td>
+            <td>Schema enforced unconditionally at protocol layer</td>
+          </tr>
+          <tr>
+            <td>Observability</td>
+            <td style="background:#F0FFF0;"><strong><code>[ERROR:CODE] message</code></strong> &mdash; 5 parseable codes for LLMs and scripts</td>
+            <td>Typed exception objects with stack context</td>
           </tr>
         </tbody>
       </table>
