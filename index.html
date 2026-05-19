@@ -22,7 +22,7 @@
 </head>
 <body>
   <div style="background: #000080; color: #FFD700; padding: 0.3rem 0; overflow: hidden; white-space: nowrap; font-family: 'Courier New', monospace; font-size: 0.85rem;">
-    <marquee>&#x2605; LiveFolders v0.9.2 &mdash; Expose tools to LLMs via plain files &mdash; New: agent auto-setup (Claude Code / Cursor / Copilot), LLM tool-authoring via create_tool.md &mdash; Apache 2.0 &mdash; Star us on GitHub! &#x2605;</marquee>
+    <marquee>&#x2605; LiveFolders v0.11.0 &mdash; Now with sandbox isolation &mdash; Landlock (Linux) + sandbox-exec (macOS) &mdash; network blocked by default, strict mode supported &mdash; Apache 2.0 &mdash; Star us on GitHub! &#x2605;</marquee>
   </div>
 
   <!-- HERO -->
@@ -343,6 +343,14 @@ if __name__ == "__main__":
           machine-readable by any MCP-aware client or script, alongside the human-readable
           <code>how_to.md</code>.</p>
         </div>
+        <div class="feature-card" style="background: #FFF0E0;">
+          <h3>&#x1f512; Sandbox Isolation</h3>
+          <p>Every handler runs in an OS-enforced sandbox. On Linux, Landlock LSM + seccomp
+          restricts filesystem paths and blocks outbound sockets. On macOS, <code>sandbox-exec</code>
+          applies equivalent SBPL rules. Network is denied by default &mdash; add <code>network: true</code>
+          in <code>folder.yaml</code> for tools that need it. Set <code>mode: strict</code> in
+          <code>livefolders.yaml</code> to refuse to mount if isolation cannot be applied.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -409,6 +417,11 @@ if __name__ == "__main__":
             <td>Input Validation</td>
             <td>Opt-in per-endpoint: <code>min_length</code>, <code>max_length</code>, <code>pattern</code>, JSON <code>schema:</code></td>
             <td style="background:#F0FFF0;"><strong>Unconditional at protocol layer</strong> &mdash; every tool validated automatically</td>
+          </tr>
+          <tr>
+            <td>Sandbox / Isolation</td>
+            <td style="background:#F0FFF0;"><strong>OS-enforced per handler</strong> &mdash; Landlock+seccomp (Linux), sandbox-exec (macOS); network blocked by default; strict mode aborts mount if unavailable</td>
+            <td>Process-level isolation depends on host; no built-in per-tool sandbox</td>
           </tr>
         </tbody>
       </table>
