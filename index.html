@@ -34,6 +34,29 @@
   </header>
 
   <!-- WHAT IS IT -->
+  <section>
+    <div class="container">
+      <h2 class="section-header">What Is It?</h2>
+      <p style="margin-bottom: 1.25rem; font-size: 1.05rem;">
+        LiveFolders mounts a virtual filesystem on your machine. Every tool you install appears as
+        a directory of plain files. An LLM reads a file to call the tool &mdash; no JSON protocol,
+        no SDK, no special client. Any agent that can run <code>cat</code> or <code>echo</code> can use it.
+      </p>
+      <div class="code-box" style="margin-bottom: 1rem;">cat .livefolders/tools/users/list
+# &#x2192; # Users
+#
+# &#x2192; ## Mr. Rudolph Robel-Fay
+# &#x2192; ID: 1
+# &#x2192; Created: 2024-01-15
+# &#x2192; Avatar: https://cdn.example.com/avatars/1.jpg</div>
+      <div class="pixel-box" style="border-color: #000080; background: #F0F0FF;">
+        <strong>&#x2139;&#xfe0f; How the blocking works:</strong>
+        The <em>write</em> call blocks until the tool finishes &mdash; by the time
+        <code>cat</code> runs, the result is ready. The filesystem never returns stale data.
+      </div>
+    </div>
+  </section>
+  <hr>
 
   <!-- HOW IT WORKS -->
 
