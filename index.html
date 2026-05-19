@@ -23,7 +23,8 @@
         No JSON. No SDK. Just <code>cat</code> and <code>echo</code>.<span class="blink">&#x258c;</span>
       </p>
       <p style="font-size: 0.9rem; color: #555; margin-bottom: 1.75rem;">
-        A virtual filesystem alternative to MCP &mdash; built in Rust, zero dependencies for tool authors.
+        A virtual filesystem alternative to MCP &mdash; built in Rust, zero dependencies for tool authors.<br>
+        <strong>10 lines of YAML vs 18 lines of Python</strong> for an equivalent REST tool.
       </p>
       <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
         <a href="https://github.com/natanloterio/LiveFolders" class="btn btn-gold" target="_blank" rel="noopener">
@@ -105,6 +106,69 @@
           </td>
         </tr>
       </table>
+    </div>
+  </section>
+  <hr>
+
+  <!-- WORKED EXAMPLE -->
+  <section>
+    <div class="container">
+      <h2 class="section-header">10 Lines vs 18 Lines</h2>
+      <p style="margin-bottom: 1.25rem; font-size: 1.05rem;">
+        Same task: fetch users from a REST API and return markdown.
+        From the peer-reviewed paper, measured on live experiments:
+      </p>
+      <table role="presentation" class="two-col" style="border: none;">
+        <tr>
+          <td style="border: none; width: 50%; vertical-align: top; padding-right: 1rem;">
+            <div style="background: #F0FFF0; border: 3px solid #008000; padding: 0.5rem 0.75rem; margin-bottom: 0.5rem; font-weight: bold; font-family: 'Courier New', monospace;">
+              LiveFolders &mdash; folder.yaml (10 lines)
+            </div>
+            <div class="code-box" style="color: #FFFFFF; font-size: 0.8rem;">name: users
+description: List users from the mock API.
+files:
+  - name: list
+    type: read_invoke
+    handler: &gt;-
+      curl -s https://mockapi.io/users
+      | jq -r '"# Users\n",
+        (.[] | "## \(.name)\nID: \(.id)\n")'
+  - name: how_to.md
+    type: readonly</div>
+          </td>
+          <td style="border: none; width: 50%; vertical-align: top; padding-left: 1rem;">
+            <div style="background: #FFF0F0; border: 3px solid #800000; padding: 0.5rem 0.75rem; margin-bottom: 0.5rem; font-weight: bold; font-family: 'Courier New', monospace;">
+              MCP &mdash; server.py (18 lines)
+            </div>
+            <div class="code-box" style="color: #CCCCCC; font-size: 0.8rem;">import httpx
+from mcp.server.fastmcp import FastMCP
+mcp = FastMCP("users")
+
+@mcp.tool()
+def list_users() -&gt; str:
+    """Fetches all users."""
+    response = httpx.get(
+        "https://jsonplaceholder.typicode.com/users"
+    )
+    response.raise_for_status()
+    users = response.json()
+    lines = ["# Users", ""]
+    for u in users:
+        lines.append(f"## {u['name']}")
+        lines.append(f"ID: {u['id']}")
+        lines.append("")
+    return "\n".join(lines)
+
+if __name__ == "__main__":
+    mcp.run()</div>
+          </td>
+        </tr>
+      </table>
+      <div class="pixel-box" style="margin-top: 1rem; background: #FFFFF0;">
+        LiveFolders: no Python, no imports, no server lifecycle. The handler is a shell one-liner.
+        The gap grows with tool complexity &mdash; every MCP tool must navigate a server framework;
+        every LiveFolders tool is independently a shell command.
+      </div>
     </div>
   </section>
   <hr>
@@ -243,10 +307,15 @@
         </a>
       </p>
       <div class="pixel-box" style="margin-top: 1.25rem; background: #FFFFF0; border-color: #888; font-size: 0.9rem;">
-        <strong>Broader ecosystem:</strong> LiveFolders is part of an emerging class of filesystem-native LLM tool integration systems.
-        A peer-reviewed paper &mdash; <em>&ldquo;Files All the Way Down: A Design Space Analysis of Filesystem-Native LLM Tool Integration&rdquo;</em> &mdash;
-        evaluates seven systems (LiveFolders, MCP, ToolFS, AgentFS, llm9p, InferNode, Quine) across ten criteria using a two-axis taxonomy.
-        <a href="https://github.com/natanloterio/LiveFolders/tree/master/paper" target="_blank" rel="noopener">Read the paper &rarr;</a>
+        <strong>Research backing:</strong> Multiple teams independently converged on the filesystem abstraction for LLM tool integration &mdash;
+        without coordination, across different languages and OS layers. This convergence motivated a systematic study.<br><br>
+        The paper <em>&ldquo;Files All the Way Down: A Design Space Analysis of Filesystem-Native LLM Tool Integration&rdquo;</em>
+        proposes a two-axis taxonomy (coupling depth &times; invocation interface), empirically evaluates seven systems
+        (LiveFolders, MCP, ToolFS, AgentFS, llm9p, InferNode, Quine) across ten criteria,
+        and derives three design principles from the observed tradeoffs.
+        Central finding: <strong>coupling depth predicts ergonomics ceiling; invocation interface predicts safety floor.</strong>
+        LiveFolders scores ✓ on 7 of 10 criteria (T1 live experiments).<br><br>
+        <a href="https://github.com/natanloterio/LiveFolders/tree/master/paper" target="_blank" rel="noopener">Read the full paper &rarr;</a>
       </div>
     </div>
   </section>
@@ -327,6 +396,8 @@ cargo install --git https://github.com/natanloterio/LiveFolders</div>
             <a href="https://github.com/natanloterio/LiveFolders/blob/master/README.md" style="color: #FFD700;" target="_blank" rel="noopener">README</a>
             &nbsp;&middot;&nbsp;
             <a href="https://github.com/natanloterio/LiveFolders/blob/master/docs/livefoldersfs-vs-mcp.md" style="color: #FFD700;" target="_blank" rel="noopener">vs MCP</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://github.com/natanloterio/LiveFolders/tree/master/paper" style="color: #FFD700;" target="_blank" rel="noopener">Paper</a>
           </td>
           <td style="border: none; width: 33%; vertical-align: top; text-align: right; font-size: 0.85rem; color: #CCC;">
             Made with &#x2665; and Rust &#x1f980;<br>
