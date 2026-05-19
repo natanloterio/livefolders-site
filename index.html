@@ -59,6 +59,44 @@
   <hr>
 
   <!-- HOW IT WORKS -->
+  <section>
+    <div class="container">
+      <h2 class="section-header">How It Works</h2>
+      <table class="two-col" style="border: none;">
+        <tr>
+          <td style="border: none; width: 45%; vertical-align: top; padding-right: 1.5rem;">
+            <div class="code-box" style="color: #FFFFFF; font-size: 0.85rem;">.livefolders/tools/
+&#x251c;&#x2500;&#x2500; index.md          &#x2190; all tools listed here
+&#x251c;&#x2500;&#x2500; demo/
+&#x2502;   &#x251c;&#x2500;&#x2500; how_to.md     &#x2190; LLM reads this first
+&#x2502;   &#x251c;&#x2500;&#x2500; shout         &#x2190; write text, read UPPERCASED
+&#x2502;   &#x2514;&#x2500;&#x2500; status        &#x2190; read-only status
+&#x2514;&#x2500;&#x2500; users/
+    &#x251c;&#x2500;&#x2500; how_to.md
+    &#x2514;&#x2500;&#x2500; list          &#x2190; reads from REST API</div>
+          </td>
+          <td style="border: none; width: 55%; vertical-align: top;">
+            <div class="pixel-box" style="margin-bottom: 0.75rem; background: #F0FFF0;">
+              <strong>1. Mount the filesystem</strong><br>
+              <code>livefolders mount</code> &mdash; runs in background, returns to prompt immediately.
+            </div>
+            <div class="pixel-box" style="margin-bottom: 0.75rem; background: #FFF8E7;">
+              <strong>2. LLM reads or writes a file</strong><br>
+              <code>cat tools/users/list</code> fetches users.<br>
+              <code>echo "London" &gt; tools/weather/forecast</code> sends a query.
+            </div>
+            <div class="pixel-box" style="background: #FFF0F0;">
+              <strong>3. Handler runs, result returns</strong><br>
+              Your shell command, Python script, or <code>curl</code> call executes.
+              Output is returned as file content.
+              <span style="color: #008080; font-weight: bold;">&#x2605; Changes hot-reload in ~1s</span>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </section>
+  <hr>
 
   <!-- KEY FEATURES -->
 
