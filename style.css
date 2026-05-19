@@ -99,6 +99,10 @@ section { padding: 2.5rem 0; }
 @keyframes blink { 50% { opacity: 0; } }
 .blink { animation: blink 1s step-start infinite; }
 
+@media (prefers-reduced-motion: reduce) {
+  .blink { animation: none; }
+}
+
 /* === Mobile === */
 @media (max-width: 640px) {
   .two-col { display: block; }
