@@ -1,0 +1,87 @@
+# LiveFolders
+
+> A virtual filesystem that exposes any tool to an LLM as plain files. No JSON. No SDK. Just `cat` and `echo`. Built in Rust, zero dependencies for tool authors.
+
+LiveFolders mounts a virtual filesystem on your machine (via FUSE). Every installed tool appears as a directory of plain files. An LLM reads a file to call the tool — no JSON protocol, no SDK, no special client. Any agent that can run `cat` or `echo` can use it.
+
+- Version: 0.11.0
+- License: Apache 2.0
+- GitHub: https://github.com/natanloterio/LiveFolders
+- Website: https://www.livefoldersfs.org
+
+## How It Works
+
+Mount the filesystem with `livefolders mount`. Tools appear under `.livefolders/tools/`. Each tool has:
+
+- `how_to.md` — human-readable usage instructions (LLM reads this first)
+- `schema.json` — machine-readable schema (mirrors MCP's `list_tools` format)
+- `index.md` — lists all installed tools
+
+To invoke a tool: write input with `echo`, read output with `cat`. The write call blocks until the handler finishes.
+
+```
+cat .livefolders/tools/users/list          # read-invoke: fetches users from API
+echo "London" > .livefolders/tools/weather/forecast  # write-invoke: sends query
+cat .livefolders/tools/weather/forecast    # read result
+cat .livefolders/tools/weather/forecast.log  # timing + stderr from last run
+```
+
+## Tool Definition (folder.yaml)
+
+Tools are defined in 6–10 lines of YAML — no server process, no imports:
+
+```yaml
+name: users
+description: List users from the mock API.
+files:
+  - name: list
+    type: read_invoke
+    handler: >-
+      curl -s https://mockapi.io/users
+      | jq -r '"# Users\n", (.[] | "## \(.name)\nID: \(.id)\n")'
+  - name: how_to.md
+    type: readonly
+```
+
+## Key Features
+
+- **Hot-Reload**: Edit `folder.yaml` or a handler script — changes take effect in ~1 second, no restart
+- **Sandbox Isolation** (v0.11.0): Landlock LSM + seccomp (Linux), sandbox-exec (macOS); network blocked by default; `network: true` to opt in; `mode: strict` refuses to mount if isolation unavailable
+- **Input Validation**: Per-endpoint `min_length`, `max_length`, `pattern`, JSON `schema:` block — validated before handler runs, auto-documented in `how_to.md`
+- **Structured Errors**: All failures return `[ERROR:CODE] message` (5 parseable codes)
+- **Logs**: Each endpoint exposes `<endpoint>.log` with `duration_ms` and `stderr` from last run
+- **Stateful Tools**: Declare `state_file:` in `folder.yaml`; runtime holds exclusive `flock` for each call, injects `LIVEFOLDERS_STATE_FILE`
+- **Declarative Pipelines**: `pipe: [stage1, stage2]` chains endpoints — stdout→stdin in one LLM write, per-stage validation
+- **Schema Discovery**: `schema.json` mirrors MCP's `list_tools` format — machine-readable by MCP-aware clients
+- **Handler Timeouts**: Hung tools killed after configurable timeout (default 30s), returns error string
+- **Secret Management**: Declare required env vars in `folder.yaml`; users prompted at install; stored in `secrets.env`
+
+## Agent Auto-Setup
+
+`livefolders init` detects the active agent and writes the instruction snippet automatically:
+
+| Agent | File |
+|-------|------|
+| Claude Code | `CLAUDE.md` |
+| Cursor / Windsurf / Aider | `AGENTS.md` |
+| GitHub Copilot | `.github/copilot-instructions.md` |
+
+## Install
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/natanloterio/LiveFolders/master/install.sh | bash
+```
+
+Prerequisites: `fuse3` (Linux) or macFUSE (macOS).
+
+## vs MCP
+
+LiveFolders is a POSIX-native alternative to MCP (Model Context Protocol). MCP is better for web clients and hosts with native MCP support. LiveFolders is better for shell-capable agents, local dev, and tool authors who want zero-dependency definitions.
+
+Full comparison: https://github.com/natanloterio/LiveFolders/blob/master/docs/livefoldersfs-vs-mcp.md
+
+## Research
+
+"Files All the Way Down: A Design Space Analysis of Filesystem-Native LLM Tool Integration" — proposes a two-axis taxonomy (coupling depth × invocation interface), evaluates 7 systems across 10 criteria. Central finding: coupling depth predicts ergonomics ceiling; invocation interface predicts safety floor. LiveFolders scores ✓ on 7/10 criteria.
+
+Paper: https://github.com/natanloterio/LiveFolders/tree/master/paper
