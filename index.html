@@ -55,6 +55,7 @@
       <a href="#install" style="color: #000080;">Install</a>
       <a href="https://github.com/natanloterio/LiveFolders" style="color: #000080;" target="_blank" rel="noopener">GitHub</a>
       <a href="https://github.com/natanloterio/LiveFolders/blob/master/README.md" style="color: #000080;" target="_blank" rel="noopener">Docs</a>
+      <a href="findings.html" style="color: #800000;">Findings</a>
       <a href="https://natanloterio.substack.com" style="color: #000080;" target="_blank" rel="noopener">Blog</a>
       <button id="copy-md-btn" onclick="copyMarkdown()" style="margin-left:auto;font-family:'Courier New',monospace;font-size:0.85rem;background:#000080;color:#FFD700;border:2px solid #111;padding:0.15rem 0.6rem;cursor:pointer;font-weight:bold;">[copy as markdown]</button>
     </div>
@@ -347,6 +348,12 @@ if __name__ == "__main__":
           The runtime holds an exclusive POSIX lock (<code>flock</code>) for the duration of each
           call and injects <code>LIVEFOLDERS_STATE_FILE</code> &mdash; no handler-side locking needed.</p>
         </div>
+        <div class="feature-card" style="background: #E8FFE8;">
+          <h3>&#x1f4ca; Native Tool Schemas</h3>
+          <p>A virtual <code>anthropic_tools.json</code> is synthesized at read time from <code>folder.yaml</code>,
+          exposing each endpoint as an Anthropic-format tool definition. Hidden endpoints are excluded automatically.
+          Inject into <code>tools=[]</code> directly &mdash; <strong>6&ndash;10% fewer tokens than MCP</strong> across an 8-task benchmark.</p>
+        </div>
         <div class="feature-card" style="background: #FDF0FF;">
           <h3>&#x1f517; Declarative Pipelines</h3>
           <p>Add <code>pipe: [stage1, stage2]</code> to chain endpoints &mdash; stdout of each
@@ -427,8 +434,14 @@ if __name__ == "__main__":
           </tr>
           <tr>
             <td>LLM Compatibility</td>
-            <td>Shell-capable agents (Claude Code, POSIX environments)</td>
+            <td>Shell-capable agents (Claude Code, POSIX environments);<br>
+            <code>anthropic_tools.json</code> enables structured tool calling without shell for API clients</td>
             <td style="background:#F0FFF0;"><strong>Any MCP-native host</strong> incl. web clients</td>
+          </tr>
+          <tr>
+            <td>Token Efficiency</td>
+            <td style="background:#F0FFF0;"><strong>6&ndash;10% fewer tokens</strong> via <code>anthropic_tools.json</code> native schemas &mdash; 100% task completion across 8-task benchmark</td>
+            <td>Baseline (0%)</td>
           </tr>
           <tr>
             <td>Input Validation</td>
@@ -457,10 +470,15 @@ if __name__ == "__main__":
         and derives three design principles from the observed tradeoffs.
         Central finding: <strong>coupling depth predicts ergonomics ceiling; invocation interface predicts safety floor.</strong>
         LiveFolders scores ✓ on 8 of 10 criteria (T1 live experiments).<br><br>
-        <strong>Notable findings from the survey:</strong> ToolFS's documented WASM sandbox is an unimplemented stub
-        (<code>InMemorySandbox</code> with no actual isolation) — its security claims do not reflect the current code.
+        <strong>New &mdash; Token Efficiency Benchmark:</strong> LiveFoldersFS's native tool schema approach
+        (<code>anthropic_tools.json</code>) achieves <strong>6&ndash;10% lower token consumption than MCP</strong>
+        across an 8-task benchmark suite, with 100% task completion on all tasks. Server-side composition
+        (pipe chains, filter endpoints, get-by-ID handlers) provides the largest per-task gains on multi-step workloads.<br><br>
+        <strong>Notable findings from the survey:</strong> ToolFS's WASM sandbox was an unimplemented stub at T2 inspection (early 2025).
         llm9p binds an unauthenticated TCP port accessible to any network process, the worst security finding in the survey.<br><br>
-        <a href="https://github.com/natanloterio/LiveFolders/tree/master/paper" target="_blank" rel="noopener">Read the full paper &rarr;</a>
+        <a href="findings.html">See full empirical findings &rarr;</a>
+        &nbsp;&nbsp;
+        <a href="https://github.com/natanloterio/LiveFolders/tree/master/paper" target="_blank" rel="noopener">Read the paper &rarr;</a>
       </div>
     </div>
   </section>

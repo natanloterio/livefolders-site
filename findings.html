@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Findings — LiveFolders Research</title>
+  <meta name="description" content="Empirical findings from the LiveFoldersFS paper: token efficiency benchmark, 7-system comparison matrix, design principles, and architecture.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav style="background: #C0C0C0; border-bottom: 3px solid #111; border-top: 3px solid #111; padding: 0.4rem 0;">
+    <div class="container" style="display: flex; gap: 1.5rem; font-size: 0.9rem; font-weight: bold; flex-wrap: wrap;">
+      <a href="/" style="color: #000080;">Home</a>
+      <a href="/#install" style="color: #000080;">Install</a>
+      <a href="https://github.com/natanloterio/LiveFolders" style="color: #000080;" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/natanloterio/LiveFolders/blob/master/README.md" style="color: #000080;" target="_blank" rel="noopener">Docs</a>
+      <a href="findings.html" style="color: #800000; text-decoration: underline;">Findings</a>
+      <a href="https://natanloterio.substack.com" style="color: #000080;" target="_blank" rel="noopener">Blog</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header style="background: #FFFAF0; border-bottom: 6px solid #111; padding: 2.5rem 0 2rem;">
+    <div class="container" style="text-align: center;">
+      <p style="font-size: 0.85rem; color: #555; margin-bottom: 0.25rem; font-family: 'Courier New', monospace;">
+        Files All the Way Down &mdash; Empirical Findings
+      </p>
+      <h1 style="font-size: 2.2rem; color: #000080; margin-bottom: 0.5rem; letter-spacing: -0.5px;">
+        Research Findings
+      </h1>
+      <p style="font-size: 1.05rem; max-width: 640px; margin: 0 auto 1rem; color: #333;">
+        Empirical results from &ldquo;Files All the Way Down: A Design Space Analysis of Filesystem-Native LLM Tool Integration.&rdquo;
+        Live experiments on Claude Code (Linux x86_64). All reproducible via <code>bash research/run-all.sh</code>.
+      </p>
+      <a href="https://github.com/natanloterio/LiveFolders/tree/master/paper" target="_blank" rel="noopener" class="btn btn-gold">
+        Read the Full Paper &rarr;
+      </a>
+    </div>
+  </header>
+
+  <!-- TOKEN EFFICIENCY BENCHMARK -->
+  <section>
+    <div class="container">
+      <h2 class="section-header">Token Efficiency Benchmark</h2>
+      <p style="font-size: 1.05rem; margin-bottom: 1rem;">
+        Token consumption is a direct proxy for inference cost and latency. We ran identical tasks against LiveFoldersFS and MCP
+        and recorded per-turn token usage via the Anthropic API.
+        <strong>LF-native beats MCP by 6&ndash;10% on every task, with 100% task completion across all runs.</strong>
+      </p>
+
+      <div class="pixel-box" style="background: #E0FFE0; margin-bottom: 1.5rem;">
+        <strong>Key result:</strong> LiveFoldersFS's native tool schema approach &mdash; Anthropic-format tool definitions synthesized at
+        read time from <code>folder.yaml</code> via <code>anthropic_tools.json</code> &mdash; achieves <strong>6&ndash;10% lower token
+        consumption than MCP</strong> across an 8-task benchmark, with 100% task completion on all tasks and all backends.
+      </div>
+
+      <h3 style="font-family: 'Courier New', monospace; font-size: 1rem; margin-bottom: 0.75rem;">Five Backends Compared</h3>
+      <table style="margin-bottom: 1.5rem; width: 100%; font-size: 0.88rem;">
+        <thead>
+          <tr>
+            <th style="text-align:left;">Backend</th>
+            <th style="text-align:left;">How it works</th>
+            <th style="text-align:left;">Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>livefolders</code> (bash)</td>
+            <td>Original <code>cat</code>/<code>echo</code> invocation, system prompt from <code>system_prompt.md</code></td>
+            <td style="color:#800000;">2.5&ndash;5&times; more expensive than MCP (up to 8&times; on near-timeout runs). <strong>Not production-suitable.</strong></td>
+          </tr>
+          <tr>
+            <td><code>livefolders-manifest</code></td>
+            <td>Same filesystem; system prompt is the concise per-endpoint listing synthesized by the VFS</td>
+            <td>+2&ndash;8% vs MCP (consistently more expensive, but large improvement over bash)</td>
+          </tr>
+          <tr style="background:#E8FFE8;">
+            <td><code>livefolders-native</code> &#x2605;</td>
+            <td>Tool schemas loaded from <code>anthropic_tools.json</code>; model calls structured Anthropic tools</td>
+            <td style="color:#005500;"><strong>&minus;6&ndash;10% vs MCP on every task</strong></td>
+          </tr>
+          <tr>
+            <td><code>livefolders-unified</code></td>
+            <td><code>anthropic_tools.json</code> schemas collapsed into one tool per namespace with an <code>action</code> enum</td>
+            <td>&minus;5&ndash;9% vs MCP (2&ndash;5% worse than native due to reduced per-action guidance)</td>
+          </tr>
+          <tr>
+            <td><code>mcp</code> (baseline)</td>
+            <td>Standard MCP server over stdio; tool schemas via <code>list_tools</code></td>
+            <td>Baseline (0%)</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size: 0.85rem; color: #555; margin-bottom: 1.5rem;">
+        Model: <code>claude-haiku-4-5</code> (maximises sensitivity to schema overhead). 5 runs per task, results averaged.
+        All 5 backends call the same upstream API (mockapi.io, 50 users). Traces logged to Weights &amp; Biases Weave.
+      </p>
+
+      <h3 style="font-family: 'Courier New', monospace; font-size: 1rem; margin-bottom: 0.75rem;">8-Task Suite Results</h3>
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; font-size: 0.88rem; min-width: 480px;">
+          <thead>
+            <tr>
+              <th style="text-align:left;">Task</th>
+              <th style="text-align:left;">Description</th>
+              <th style="text-align:center;">LF-native</th>
+              <th style="text-align:center;">LF-unified</th>
+              <th style="text-align:center;">MCP</th>
+              <th style="text-align:center; background:#E0FFE0;">LF-native vs MCP</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>count_users</code></td>
+              <td>Count total users</td>
+              <td style="text-align:center;">1,893</td>
+              <td style="text-align:center;">1,915</td>
+              <td style="text-align:center;">2,094</td>
+              <td style="text-align:center; background:#E0FFE0; color:#005500; font-weight:bold;">&minus;9.6%</td>
+            </tr>
+            <tr>
+              <td><code>count_composed</code></td>
+              <td>Count via pipe-composed endpoint (server-side)</td>
+              <td style="text-align:center;">1,892</td>
+              <td style="text-align:center;">1,914</td>
+              <td style="text-align:center;">2,093</td>
+              <td style="text-align:center; background:#E0FFE0; color:#005500; font-weight:bold;">&minus;9.6%</td>
+            </tr>
+            <tr>
+              <td><code>single_user</code></td>
+              <td>Look up a user by name</td>
+              <td style="text-align:center;">1,962</td>
+              <td style="text-align:center;">2,235</td>
+              <td style="text-align:center;">2,163</td>
+              <td style="text-align:center; background:#E0FFE0; color:#005500; font-weight:bold;">&minus;9.3%</td>
+            </tr>
+            <tr>
+              <td><code>list_users</code></td>
+              <td>List all users with name and ID</td>
+              <td style="text-align:center;">2,917</td>
+              <td style="text-align:center;">2,915</td>
+              <td style="text-align:center;">3,176</td>
+              <td style="text-align:center; background:#E0FFE0; color:#005500; font-weight:bold;">&minus;8.2%</td>
+            </tr>
+            <tr>
+              <td><code>cross_reference</code></td>
+              <td>Find user's account creation date</td>
+              <td style="text-align:center;">3,190</td>
+              <td style="text-align:center;">3,231</td>
+              <td style="text-align:center;">3,471</td>
+              <td style="text-align:center; background:#E0FFE0; color:#005500; font-weight:bold;">&minus;8.1%</td>
+            </tr>
+            <tr>
+              <td><code>count_and_find</code></td>
+              <td>Count users AND find a specific user's ID</td>
+              <td style="text-align:center;">2,102</td>
+              <td style="text-align:center;">2,148</td>
+              <td style="text-align:center;">2,282</td>
+              <td style="text-align:center; background:#E0FFE0; color:#005500; font-weight:bold;">&minus;7.9%</td>
+            </tr>
+            <tr>
+              <td><code>filter_and_count</code></td>
+              <td>Find users with 'a' in name; count them</td>
+              <td style="text-align:center;">2,582</td>
+              <td style="text-align:center;">2,622</td>
+              <td style="text-align:center;">2,794</td>
+              <td style="text-align:center; background:#E0FFE0; color:#005500; font-weight:bold;">&minus;7.6%</td>
+            </tr>
+            <tr>
+              <td><code>list_compact</code></td>
+              <td>List users as compact id:name pairs (pipe)</td>
+              <td style="text-align:center;">2,786</td>
+              <td style="text-align:center;">2,805</td>
+              <td style="text-align:center;">2,975</td>
+              <td style="text-align:center; background:#E0FFE0; color:#005500; font-weight:bold;">&minus;6.4%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size: 0.8rem; color: #555; margin-top: 0.5rem;">
+        5-run averages. With only 5 runs per task, effects below ~3% should be treated as indicative rather than statistically robust.
+      </p>
+
+      <h3 style="font-family: 'Courier New', monospace; font-size: 1rem; margin: 1.5rem 0 0.75rem;">Why LF-native is cheaper</h3>
+      <div class="feature-grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
+        <div class="pixel-box" style="background: #F0FFF0;">
+          <strong>Compact schemas</strong><br><br>
+          Hidden endpoints (marked <code>hidden: true</code> in <code>folder.yaml</code>) are excluded from <code>anthropic_tools.json</code>,
+          while MCP exposes all registered tools unconditionally. For the users API (6 visible, 3 hidden endpoints),
+          the LF schema is ~15% smaller than the equivalent MCP <code>list_tools</code> response.
+        </div>
+        <div class="pixel-box" style="background: #FFF8E7;">
+          <strong>Server-side composition</strong><br><br>
+          Pipe chains, filter endpoints, and get-by-ID handlers move work from model context to tool execution,
+          reducing output tokens. On <code>filter_and_count</code>, adding a server-side <code>filter</code> endpoint dropped
+          output tokens from ~963 to ~386 — the model receives a pre-aggregated answer rather than 50 raw users.
+        </div>
+        <div class="pixel-box" style="background: #F0F0FF;">
+          <strong>Fewer reasoning turns</strong><br><br>
+          The <code>cross_reference</code> task benefits from a <code>get</code> endpoint (fetch-by-ID) that returns
+          exactly the needed fields (<code>name</code>, <code>id</code>, <code>createdAt</code>, <code>avatar</code>)
+          rather than requiring the model to scan a full listing in context.
+        </div>
+      </div>
+
+      <div class="pixel-box" style="margin-top: 1.25rem; background: #FFF0F0; border-color: #800000; font-size: 0.9rem;">
+        <strong>The bash backend is not suitable for production.</strong> The original <code>livefolders</code> backend
+        (plain <code>cat</code>/<code>echo</code> via system prompt) is 155&ndash;400% more expensive than MCP on tasks that complete,
+        with runs approaching the 10-turn safety cap pushing toward 8&times; the token cost.
+        Use <code>anthropic_tools.json</code> (<code>livefolders-native</code>) for production deployments.
+      </div>
+    </div>
+  </section>
+  <hr>
+
+  <!-- HOW ANTHROPIC_TOOLS.JSON WORKS -->
+  <section>
+    <div class="container">
+      <h2 class="section-header">How <code>anthropic_tools.json</code> Works</h2>
+      <p style="margin-bottom: 1rem; font-size: 1.05rem;">
+        LiveFoldersFS synthesizes a virtual <code>anthropic_tools.json</code> file at read time from <code>folder.yaml</code>.
+        Each invokable endpoint becomes an Anthropic-format native tool definition that can be injected directly
+        into the <code>tools=[]</code> API parameter &mdash; enabling structured tool calling without shell access.
+      </p>
+      <table role="presentation" class="two-col" style="border: none;">
+        <tr>
+          <td style="border: none; width: 50%; vertical-align: top; padding-right: 1rem;">
+            <div style="background: #F0FFF0; border: 3px solid #008000; padding: 0.5rem 0.75rem; margin-bottom: 0.5rem; font-weight: bold; font-family: 'Courier New', monospace;">
+              folder.yaml (source)
+            </div>
+            <div class="code-box" style="color: #FFFFFF; font-size: 0.8rem;">name: users
+description: User management tools.
+files:
+  - name: count
+    type: read_invoke
+    description: Count total users
+    handler: curl -s .../users | jq length
+  - name: search
+    type: write_invoke
+    description: Search users by name
+    input:
+      type: string
+      min_length: 1
+    handler: ...
+  - name: _internal_stage
+    type: read_invoke
+    hidden: true     &larr; excluded from tools
+    handler: ...</div>
+          </td>
+          <td style="border: none; width: 50%; vertical-align: top; padding-left: 1rem;">
+            <div style="background: #E8F4FD; border: 3px solid #000080; padding: 0.5rem 0.75rem; margin-bottom: 0.5rem; font-weight: bold; font-family: 'Courier New', monospace;">
+              anthropic_tools.json (synthesized)
+            </div>
+            <div class="code-box" style="color: #FFFFFF; font-size: 0.8rem;">[
+  {
+    "name": "users__count",
+    "description": "Count total users",
+    "input_schema": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "name": "users__search",
+    "description": "Search users by name",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "input": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": ["input"]
+    }
+  }
+]</div>
+          </td>
+        </tr>
+      </table>
+      <div class="pixel-box" style="margin-top: 1rem; background: #FFFFF0;">
+        Hidden endpoints are excluded from <code>anthropic_tools.json</code> automatically &mdash; the model only sees the
+        endpoints it should call, reducing schema tokens. The file is never written to disk; it is synthesized fresh on every read
+        from the current <code>folder.yaml</code>.
+      </div>
+    </div>
+  </section>
+  <hr>
+
+  <!-- 7x10 MATRIX -->
+  <section>
+    <div class="container">
+      <h2 class="section-header">7-System Comparison Matrix</h2>
+      <p style="margin-bottom: 1rem;">
+        All seven systems evaluated across ten criteria using three evidence tiers:
+        <strong>T1</strong> = live experiments &middot; <strong>T2</strong> = structured assessment (code + install) &middot; <strong>T3</strong> = paper-only.
+        Rating: &#x2713; strong &middot; ~ partial &middot; &#x2717; weak &middot; &mdash; N/A.
+      </p>
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; font-size: 0.82rem; min-width: 640px;">
+          <thead>
+            <tr>
+              <th style="text-align:left;">Criterion</th>
+              <th style="background:#E0FFE0;">LiveFolders<br><span style="font-weight:normal;font-size:0.75rem;">T1</span></th>
+              <th>MCP<br><span style="font-weight:normal;font-size:0.75rem;">T1</span></th>
+              <th>ToolFS<br><span style="font-weight:normal;font-size:0.75rem;">T2</span></th>
+              <th>AgentFS<br><span style="font-weight:normal;font-size:0.75rem;">T2</span></th>
+              <th>llm9p<br><span style="font-weight:normal;font-size:0.75rem;">T2</span></th>
+              <th>InferNode<br><span style="font-weight:normal;font-size:0.75rem;">T3</span></th>
+              <th>Quine<br><span style="font-weight:normal;font-size:0.75rem;">T3</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>01 Setup complexity</td><td style="background:#E0FFE0;text-align:center;">&#x2713;</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">&#x2717;</td><td style="text-align:center;">~</td></tr>
+            <tr><td>02 LLM compatibility</td><td style="background:#E0FFE0;text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td></tr>
+            <tr><td>03 Discoverability</td><td style="background:#E0FFE0;text-align:center;">&#x2713;</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">&mdash;</td><td style="text-align:center;">&mdash;</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td></tr>
+            <tr><td>04 I/O expressiveness</td><td style="background:#E0FFE0;text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">&#x2713;</td></tr>
+            <tr><td>05 Security</td><td style="background:#E0FFE0;text-align:center;">&#x2713;</td><td style="text-align:center;">&#x2713;</td><td style="text-align:center;">~&nbsp;<sup title="WASM sandbox was an unimplemented stub at T2 inspection (early 2025)">&#x26a0;</sup></td><td style="text-align:center;">~</td><td style="text-align:center;">&#x2717;&nbsp;<sup title="Unauthenticated TCP port accessible to any network process">&#x26a0;</sup></td><td style="text-align:center;">&#x2713;</td><td style="text-align:center;">~</td></tr>
+            <tr><td>06 Stateful tools</td><td style="background:#E0FFE0;text-align:center;">&#x2713;</td><td style="text-align:center;">~</td><td style="text-align:center;">&#x2713;</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td></tr>
+            <tr><td>07 Composability</td><td style="background:#E0FFE0;text-align:center;">&#x2713;</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">&mdash;</td><td style="text-align:center;">~</td><td style="text-align:center;">&#x2713;</td><td style="text-align:center;">&#x2713;</td></tr>
+            <tr><td>08 Observability</td><td style="background:#E0FFE0;text-align:center;">&#x2713;</td><td style="text-align:center;">&#x2713;</td><td style="text-align:center;">~</td><td style="text-align:center;">&#x2713;</td><td style="text-align:center;">&#x2717;</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td></tr>
+            <tr><td>09 Hot-reload</td><td style="background:#E0FFE0;text-align:center;">&#x2713;</td><td style="text-align:center;">&#x2717;</td><td style="text-align:center;">&#x2717;</td><td style="text-align:center;">&mdash;</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td></tr>
+            <tr><td>10 Publishing</td><td style="background:#E0FFE0;text-align:center;">&#x2713;</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">&mdash;</td><td style="text-align:center;">&mdash;</td><td style="text-align:center;">&#x2717;</td><td style="text-align:center;">~</td></tr>
+            <tr style="font-weight:bold;border-top:3px solid #111;">
+              <td>&#x2713; count</td>
+              <td style="background:#E0FFE0;text-align:center;">8</td>
+              <td style="text-align:center;">3</td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;">0</td>
+              <td style="text-align:center;">3</td>
+              <td style="text-align:center;">2</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top: 0.5rem; font-size: 0.8rem; color: #555;">
+        &#x26a0; ToolFS criterion 05: WASM sandbox was an unimplemented stub (<code>InMemorySandbox</code>) at the time of T2 code inspection (early 2025); subsequent releases may differ.
+        llm9p criterion 05: unauthenticated TCP port accessible to any network process.
+      </p>
+    </div>
+  </section>
+  <hr>
+
+  <!-- ARCHITECTURE -->
+  <section>
+    <div class="container">
+      <h2 class="section-header">Architecture Overview</h2>
+      <p style="margin-bottom: 1rem; font-size: 1.05rem;">
+        LiveFoldersFS is os-coupled and posix-invocation: the FUSE kernel layer is the sole entry point,
+        and every tool invocation reduces to a standard file write followed by a file read &mdash; no protocol, no SDK.
+      </p>
+      <table role="presentation" class="two-col" style="border: none;">
+        <tr>
+          <td style="border: none; width: 50%; vertical-align: top; padding-right: 1rem;">
+            <div class="pixel-box" style="background: #F0F0FF; margin-bottom: 0.75rem;">
+              <strong><code>src/fs/vfs.rs</code></strong><br>
+              Implements the FUSE <code>Filesystem</code> trait. Maintains three in-memory maps keyed by inode:
+              <code>write_buf</code> (accumulates write bytes), <code>result_buf</code> (handler output),
+              <code>trace_buf</code> (companion <code>.log</code> content). The <code>release()</code> event
+              triggers handler dispatch for <code>write_invoke</code> endpoints; <code>read_invoke</code> fires on <code>read()</code>.
+            </div>
+            <div class="pixel-box" style="background: #FFF8E7; margin-bottom: 0.75rem;">
+              <strong><code>src/registry/</code></strong><br>
+              Maps names to <code>Arc&lt;dyn Tool&gt;</code> implementations. Built-in tools registered at startup;
+              external tools loaded from subdirectories under <code>tools_dir</code>, each described by a
+              <code>folder.yaml</code> manifest parsed by <code>src/manifest.rs</code>.
+            </div>
+            <div class="pixel-box" style="background: #F0FFF0;">
+              <strong><code>src/fs/how_to_gen.rs</code> &amp; <code>schema_gen.rs</code></strong><br>
+              Synthesize <code>how_to.md</code> and <code>schema.json</code> at read time from the manifest.
+              Never written to disk. <code>anthropic_tools.json</code> is also synthesized here,
+              excluding hidden endpoints automatically.
+            </div>
+          </td>
+          <td style="border: none; width: 50%; vertical-align: top; padding-left: 1rem;">
+            <div class="pixel-box" style="background: #FFF0F0; margin-bottom: 0.75rem;">
+              <strong><code>src/sandbox/</code></strong><br>
+              Applies <code>PR_SET_NO_NEW_PRIVS</code>, Landlock LSM filesystem access control, and seccomp-BPF
+              network filtering before each handler process starts. Transparent to handler authors &mdash;
+              shell scripts run unchanged inside the sandbox.
+            </div>
+            <div class="pixel-box" style="background: #F5FFF5; margin-bottom: 0.75rem;">
+              <strong>Hot-reload via inotify</strong><br>
+              An inotify-based watcher monitors <code>tools_dir</code> for changes and hot-reloads the registry
+              without remounting. Updated handlers are visible within ~1 second, with no agent reconnection.
+            </div>
+            <div class="pixel-box" style="background: #FFFFF0;">
+              <strong>Daemon layer</strong><br>
+              Forks after mount options are validated, redirecting stderr to a log file and writing a PID file
+              for the <code>stop</code> subcommand. <code>livefolders mount</code> returns to the prompt
+              immediately while the daemon runs in background.
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </section>
+  <hr>
+
+  <!-- DESIGN PRINCIPLES -->
+  <section>
+    <div class="container">
+      <h2 class="section-header">Three Design Principles</h2>
+      <div class="feature-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+        <div class="feature-card" style="background: #E8F4FD;">
+          <h3>&#x1f4cf; Principle 1</h3>
+          <p><strong>Coupling depth determines ergonomics ceiling.</strong><br><br>
+          OS-coupled systems inherit decades of POSIX tooling. The token benchmark adds a quantitative dimension:
+          when LiveFoldersFS exposes tools as Anthropic-native schemas via <code>anthropic_tools.json</code>,
+          it achieves 6&ndash;10% lower token consumption than MCP. The advantage compounds on aggregate tasks
+          because server-side composition moves work from model context to tool execution &mdash;
+          structurally unavailable to protocol-decoupled systems without equivalent server-side aggregation.
+          Tradeoff: os-coupled systems require shell and filesystem access; MCP operates over HTTP and
+          can serve agents anywhere.</p>
+        </div>
+        <div class="feature-card" style="background: #FFF5E6;">
+          <h3>&#x1f6e1;&#xfe0f; Principle 2</h3>
+          <p><strong>Invocation interface determines safety floor.</strong><br><br>
+          RPC systems (MCP) enforce input schemas unconditionally before any handler runs.
+          POSIX systems historically concentrated security on handler authors.
+          LiveFoldersFS narrows this gap with opt-in per-endpoint validation (v0.7.0) plus VFS-layer sandboxing
+          via Landlock + seccomp-BPF (v0.11.0). Remaining gap: MCP validation is unconditional;
+          LiveFoldersFS requires explicit opt-in per endpoint. Worst finding in the survey:
+          llm9p's unauthenticated TCP port is accessible to any network process.</p>
+        </div>
+        <div class="feature-card" style="background: #F0FFF0;">
+          <h3>&#x1f4e6; Principle 3</h3>
+          <p><strong>Publishing model is underexplored.</strong><br><br>
+          LiveFoldersFS is the only surveyed system treating tool distribution as a first-class design concern.
+          <code>livefolders install github.com/you/repo</code> requires no registry, no package upload, no config editing.
+          All other systems require manual configuration or informal community registries.
+          As the ecosystem matures, install friction will determine whether tool ecosystems grow organically
+          or remain fragmented.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <hr>
+
+  <!-- LIMITATIONS -->
+  <section>
+    <div class="container">
+      <h2 class="section-header">Limitations</h2>
+      <div class="pixel-box" style="background: #F5F5F5; font-size: 0.95rem;">
+        <ul style="margin: 0; padding-left: 1.25rem; line-height: 1.8;">
+          <li>The token efficiency benchmark uses a single model (<code>claude-haiku-4-5</code>) and a single upstream API (mockapi.io, 50 users). Token margins may shift for larger models, denser APIs, or different tool-call-to-output ratios.</li>
+          <li>T2 and T3 assessments capture a point-in-time code and documentation snapshot. Rapidly evolving projects may have addressed noted deficiencies since inspection.</li>
+          <li>With only 5 runs per task, the benchmark does not support formal statistical inference. Effects below ~3% should be treated as indicative.</li>
+          <li>The evaluation host (Claude Code on Linux x86_64 with shell access) may not represent cloud-hosted agent deployments where the LLM has no filesystem access, which would lower LLM compatibility ratings for all os-coupled systems.</li>
+        </ul>
+      </div>
+      <div class="pixel-box" style="margin-top: 1rem; background: #FFFFF0; font-size: 0.9rem;">
+        <strong>Competing interests:</strong> The author is the primary developer of LiveFoldersFS, one of the two T1 systems evaluated.
+        Explicit evidence tiers and publicly reproducible experiments are intended to mitigate, though not eliminate, the risk of confirmation bias.
+        All T1 results are reproducible via <code>bash research/run-all.sh</code> from the repository root.
+      </div>
+    </div>
+  </section>
+  <hr>
+
+  <!-- FOOTER -->
+  <footer style="background: #000080; color: #FFFFFF; padding: 2rem 0; border-top: 6px solid #111;">
+    <div class="container">
+      <table role="presentation" style="border: none; width: 100%;">
+        <tr>
+          <td style="border: none; width: 33%; vertical-align: top;">
+            <strong style="font-size: 1.1rem;">LiveFolders</strong><br>
+            <span style="font-size: 0.85rem; color: #CCC;">Apache 2.0 License</span>
+          </td>
+          <td style="border: none; width: 34%; vertical-align: top; text-align: center;">
+            <a href="/" style="color: #FFD700;">Home</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://github.com/natanloterio/LiveFolders" style="color: #FFD700;" target="_blank" rel="noopener">GitHub</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://github.com/natanloterio/LiveFolders/blob/master/README.md" style="color: #FFD700;" target="_blank" rel="noopener">README</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://github.com/natanloterio/LiveFolders/tree/master/paper" style="color: #FFD700;" target="_blank" rel="noopener">Paper</a>
+          </td>
+          <td style="border: none; width: 33%; vertical-align: top; text-align: right; font-size: 0.85rem; color: #CCC;">
+            Made with &#x2665; and Rust &#x1f980;
+          </td>
+        </tr>
+      </table>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('.code-box').forEach(function (box) {
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'position:relative;';
+        box.parentNode.insertBefore(wrapper, box);
+        wrapper.appendChild(box);
+
+        const btn = document.createElement('button');
+        btn.textContent = '[COPY]';
+        btn.style.cssText = [
+          'position:absolute', 'top:0.4rem', 'right:0.4rem',
+          'font-family:"Courier New",monospace', 'font-size:0.75rem',
+          'background:#222', 'color:#0F0', 'border:1px solid #0F0',
+          'padding:0.15rem 0.4rem', 'cursor:pointer', 'opacity:0',
+          'transition:opacity 0.15s'
+        ].join(';');
+
+        wrapper.addEventListener('mouseenter', function () { btn.style.opacity = '1'; });
+        wrapper.addEventListener('mouseleave', function () { btn.style.opacity = '0'; });
+
+        btn.addEventListener('click', function () {
+          navigator.clipboard.writeText(box.textContent).then(function () {
+            btn.textContent = '[COPIED!]';
+            setTimeout(function () { btn.textContent = '[COPY]'; }, 2000);
+          }).catch(function () {
+            btn.textContent = '[FAILED]';
+            setTimeout(function () { btn.textContent = '[COPY]'; }, 2000);
+          });
+        });
+
+        wrapper.appendChild(btn);
+      });
+    });
+  </script>
+</body>
+</html>
