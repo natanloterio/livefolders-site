@@ -56,8 +56,25 @@
       <a href="https://github.com/natanloterio/LiveFolders" style="color: #000080;" target="_blank" rel="noopener">GitHub</a>
       <a href="https://github.com/natanloterio/LiveFolders/blob/master/README.md" style="color: #000080;" target="_blank" rel="noopener">Docs</a>
       <a href="https://natanloterio.substack.com" style="color: #000080;" target="_blank" rel="noopener">Blog</a>
+      <button id="copy-md-btn" onclick="copyMarkdown()" style="margin-left:auto;font-family:'Courier New',monospace;font-size:0.85rem;background:#000080;color:#FFD700;border:2px solid #111;padding:0.15rem 0.6rem;cursor:pointer;font-weight:bold;">[copy as markdown]</button>
     </div>
   </nav>
+  <div id="copy-md-toast" style="display:none;position:fixed;bottom:1.5rem;right:1.5rem;background:#000080;color:#FFD700;font-family:'Courier New',monospace;font-size:0.85rem;padding:0.5rem 1rem;border:2px solid #FFD700;z-index:9999;">Copied to clipboard!</div>
+  <script>
+    function copyMarkdown() {
+      fetch('/llms.txt')
+        .then(function(r){ return r.text(); })
+        .then(function(text){
+          navigator.clipboard.writeText(text).then(function(){
+            var btn = document.getElementById('copy-md-btn');
+            var toast = document.getElementById('copy-md-toast');
+            btn.textContent = '[copied!]';
+            toast.style.display = 'block';
+            setTimeout(function(){ btn.textContent = '[copy as markdown]'; toast.style.display = 'none'; }, 2500);
+          });
+        });
+    }
+  </script>
 
   <!-- WHAT IS IT -->
   <section>
@@ -439,8 +456,102 @@ if __name__ == "__main__":
         (LiveFolders, MCP, ToolFS, AgentFS, llm9p, InferNode, Quine) across ten criteria,
         and derives three design principles from the observed tradeoffs.
         Central finding: <strong>coupling depth predicts ergonomics ceiling; invocation interface predicts safety floor.</strong>
-        LiveFolders scores ✓ on 7 of 10 criteria (T1 live experiments).<br><br>
+        LiveFolders scores ✓ on 8 of 10 criteria (T1 live experiments).<br><br>
+        <strong>Notable findings from the survey:</strong> ToolFS's documented WASM sandbox is an unimplemented stub
+        (<code>InMemorySandbox</code> with no actual isolation) — its security claims do not reflect the current code.
+        llm9p binds an unauthenticated TCP port accessible to any network process, the worst security finding in the survey.<br><br>
         <a href="https://github.com/natanloterio/LiveFolders/tree/master/paper" target="_blank" rel="noopener">Read the full paper &rarr;</a>
+      </div>
+    </div>
+  </section>
+  <hr>
+
+  <!-- FULL COMPARISON MATRIX -->
+  <section>
+    <div class="container">
+      <h2 class="section-header">7-System Comparison Matrix</h2>
+      <p style="margin-bottom: 1rem; font-size: 1.05rem;">
+        The paper evaluates all seven systems across ten criteria using three evidence tiers:
+        <strong>T1</strong> = live experiments &middot; <strong>T2</strong> = structured assessment (code + install) &middot; <strong>T3</strong> = paper-only.
+        Rating: &#x2713; strong &middot; ~ partial &middot; &#x2717; weak &middot; &mdash; N/A.
+      </p>
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; font-size: 0.82rem; min-width: 640px;">
+          <thead>
+            <tr>
+              <th style="text-align:left;">Criterion</th>
+              <th style="background:#E0FFE0;">LiveFolders<br><span style="font-weight:normal;font-size:0.75rem;">T1</span></th>
+              <th>MCP<br><span style="font-weight:normal;font-size:0.75rem;">T1</span></th>
+              <th>ToolFS<br><span style="font-weight:normal;font-size:0.75rem;">T2</span></th>
+              <th>AgentFS<br><span style="font-weight:normal;font-size:0.75rem;">T2</span></th>
+              <th>llm9p<br><span style="font-weight:normal;font-size:0.75rem;">T2</span></th>
+              <th>InferNode<br><span style="font-weight:normal;font-size:0.75rem;">T3</span></th>
+              <th>Quine<br><span style="font-weight:normal;font-size:0.75rem;">T3</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>01 Setup complexity</td><td style="background:#E0FFE0;text-align:center;">&#x2713;</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">&#x2717;</td><td style="text-align:center;">~</td></tr>
+            <tr><td>02 LLM compatibility</td><td style="background:#E0FFE0;text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td></tr>
+            <tr><td>03 Discoverability</td><td style="background:#E0FFE0;text-align:center;">&#x2713;</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">&mdash;</td><td style="text-align:center;">&mdash;</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td></tr>
+            <tr><td>04 I/O expressiveness</td><td style="background:#E0FFE0;text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">&#x2713;</td></tr>
+            <tr><td>05 Security</td><td style="background:#E0FFE0;text-align:center;">&#x2713;</td><td style="text-align:center;">&#x2713;</td><td style="text-align:center;">~&nbsp;<sup title="WASM sandbox is an unimplemented stub">&#x26a0;</sup></td><td style="text-align:center;">~</td><td style="text-align:center;">&#x2717;&nbsp;<sup title="Unauthenticated TCP port — accessible to any network process">&#x26a0;</sup></td><td style="text-align:center;">&#x2713;</td><td style="text-align:center;">~</td></tr>
+            <tr><td>06 Stateful tools</td><td style="background:#E0FFE0;text-align:center;">&#x2713;</td><td style="text-align:center;">~</td><td style="text-align:center;">&#x2713;</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td></tr>
+            <tr><td>07 Composability</td><td style="background:#E0FFE0;text-align:center;">&#x2713;</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">&mdash;</td><td style="text-align:center;">~</td><td style="text-align:center;">&#x2713;</td><td style="text-align:center;">&#x2713;</td></tr>
+            <tr><td>08 Observability</td><td style="background:#E0FFE0;text-align:center;">&#x2713;</td><td style="text-align:center;">&#x2713;</td><td style="text-align:center;">~</td><td style="text-align:center;">&#x2713;</td><td style="text-align:center;">&#x2717;</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td></tr>
+            <tr><td>09 Hot-reload</td><td style="background:#E0FFE0;text-align:center;">&#x2713;</td><td style="text-align:center;">&#x2717;</td><td style="text-align:center;">&#x2717;</td><td style="text-align:center;">&mdash;</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td></tr>
+            <tr><td>10 Publishing</td><td style="background:#E0FFE0;text-align:center;">&#x2713;</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">&mdash;</td><td style="text-align:center;">&mdash;</td><td style="text-align:center;">&#x2717;</td><td style="text-align:center;">~</td></tr>
+            <tr style="font-weight:bold;border-top:3px solid #111;">
+              <td>&#x2713; count</td>
+              <td style="background:#E0FFE0;text-align:center;">8</td>
+              <td style="text-align:center;">3</td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;">0</td>
+              <td style="text-align:center;">3</td>
+              <td style="text-align:center;">2</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top: 0.5rem; font-size: 0.8rem; color: #555;">
+        &#x26a0; ToolFS criterion 05: documented WASM sandbox is an unimplemented stub (<code>InMemorySandbox</code>).
+        llm9p criterion 05: unauthenticated TCP port accessible to any network process.
+      </p>
+    </div>
+  </section>
+  <hr>
+
+  <!-- DESIGN PRINCIPLES -->
+  <section>
+    <div class="container">
+      <h2 class="section-header">Three Design Principles</h2>
+      <p style="margin-bottom: 1.25rem; font-size: 1.05rem;">
+        Derived from the empirical comparison in the paper:
+      </p>
+      <div class="feature-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+        <div class="feature-card" style="background: #E8F4FD;">
+          <h3>&#x1f4cf; Principle 1</h3>
+          <p><strong>Coupling depth determines ergonomics ceiling.</strong><br><br>
+          OS-coupled systems inherit decades of POSIX tooling — any shell command is immediately a tool handler.
+          The worked example shows this concretely: 10-line YAML vs 18-line Python, with the gap growing at scale.
+          The tradeoff is portability: cloud-hosted agents accessing tools over a network favor protocol-decoupled approaches.</p>
+        </div>
+        <div class="feature-card" style="background: #FFF5E6;">
+          <h3>&#x1f6e1;&#xfe0f; Principle 2</h3>
+          <p><strong>Invocation interface determines safety floor.</strong><br><br>
+          RPC systems (MCP) enforce input schemas unconditionally before any handler runs.
+          POSIX systems historically concentrated security on handler authors.
+          LiveFolders narrows this gap with opt-in per-endpoint validation + VFS-layer sandboxing (Landlock, seccomp-BPF).
+          The remaining gap: MCP validation is unconditional; LiveFolders requires explicit opt-in per endpoint.</p>
+        </div>
+        <div class="feature-card" style="background: #F0FFF0;">
+          <h3>&#x1f4e6; Principle 3</h3>
+          <p><strong>Publishing model is underexplored.</strong><br><br>
+          LiveFolders is the only surveyed system that treats tool distribution as a first-class design concern.
+          <code>livefolders install github.com/you/repo</code> requires no registry, no package upload, no config editing.
+          All other systems require manual configuration or informal community registries.
+          As the ecosystem matures, install friction will determine whether tool ecosystems grow organically or stay fragmented.</p>
+        </div>
       </div>
     </div>
   </section>
