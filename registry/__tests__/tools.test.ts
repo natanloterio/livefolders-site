@@ -44,4 +44,11 @@ describe('POST /api/tools/:owner/:name/downloads', () => {
     const res = await POST(new Request('http://localhost'), ctx('nobody', 'nothing'))
     expect(res.status).toBe(404)
   })
+
+  it('returns updated download count', async () => {
+    const res = await POST(new Request('http://localhost'), ctx('alice', 'git-helper'))
+    expect(res.status).toBe(200)
+    const json = await res.json()
+    expect(json.downloads).toBe(5)
+  })
 })
