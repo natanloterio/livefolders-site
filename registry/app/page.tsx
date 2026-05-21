@@ -1,66 +1,94 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import { getDb } from '@/lib/db'
+import { ToolRow, ToolSummary } from '@/components/ToolRow'
+import './globals.css'
 
-export default function Home() {
+export const revalidate = 60
+
+async function getRecentTools(): Promise<ToolSummary[]> {
+  const db = getDb()
+  return db`SELECT owner, name, description, downloads FROM tools ORDER BY created_at DESC LIMIT 10` as unknown as Promise<ToolSummary[]>
+}
+
+async function getMostDownloaded(): Promise<ToolSummary[]> {
+  const db = getDb()
+  return db`SELECT owner, name, description, downloads FROM tools ORDER BY downloads DESC LIMIT 10` as unknown as Promise<ToolSummary[]>
+}
+
+async function searchTools(q: string): Promise<ToolSummary[]> {
+  const db = getDb()
+  return db`
+    SELECT owner, name, description, downloads FROM tools
+    WHERE to_tsvector('english',
+        coalesce(name,'') || ' ' || coalesce(description,'') || ' ' || array_to_string(tags,' ')
+      ) @@ plainto_tsquery('english', ${q})
+    ORDER BY downloads DESC LIMIT 20
+  ` as unknown as Promise<ToolSummary[]>
+}
+
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>
+}) {
+  const { q } = await searchParams
+  const query = q?.trim() ?? ''
+
+  const [recent, popular, results] = await Promise.all([
+    query ? Promise.resolve([]) : getRecentTools(),
+    query ? Promise.resolve([]) : getMostDownloaded(),
+    query ? searchTools(query) : Promise.resolve([]),
+  ])
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="container">
+      <h1 style={{ color: '#000080', borderBottom: '6px solid #000', paddingBottom: 8 }}>
+        LiveFolders Registry
+      </h1>
+      <p>Discover and install LiveFolders tools. <code>livefolders install owner/name</code></p>
+
+      <form method="GET" style={{ margin: '16px 0' }}>
+        <input
+          name="q"
+          defaultValue={query}
+          placeholder="Search tools..."
+          style={{ fontFamily: 'inherit', fontSize: '1rem', padding: '4px 8px', border: '3px solid #000', width: 280 }}
         />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+        {' '}
+        <button type="submit" className="btn">Search</button>
+      </form>
+
+      {query ? (
+        <>
+          <h2>Results for &ldquo;{query}&rdquo;</h2>
+          {results.length === 0 ? <p>No tools found.</p> : (
+            <table>
+              <thead><tr><th>Tool</th><th>Description</th><th>Downloads</th></tr></thead>
+              <tbody>{results.map(t => <ToolRow key={`${t.owner}/${t.name}`} tool={t} />)}</tbody>
+            </table>
+          )}
+        </>
+      ) : (
+        <>
+          <h2>Most Downloaded</h2>
+          <table>
+            <thead><tr><th>Tool</th><th>Description</th><th>Downloads</th></tr></thead>
+            <tbody>{popular.map(t => <ToolRow key={`${t.owner}/${t.name}`} tool={t} />)}</tbody>
+          </table>
+
+          <h2>Recently Published</h2>
+          <table>
+            <thead><tr><th>Tool</th><th>Description</th><th>Downloads</th></tr></thead>
+            <tbody>{recent.map(t => <ToolRow key={`${t.owner}/${t.name}`} tool={t} />)}</tbody>
+          </table>
+        </>
+      )}
+
+      <hr />
+      <p style={{ fontSize: '0.85rem' }}>
+        <a href="https://github.com/natanloterio/LiveFolders">LiveFolders on GitHub</a>
+        {' · '}
+        <a href="https://www.livefoldersfs.org">livefoldersfs.org</a>
+      </p>
     </div>
-  );
+  )
 }
