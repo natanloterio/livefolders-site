@@ -1,8 +1,11 @@
-import { neon } from '@neondatabase/serverless'
+import postgres from 'postgres'
+
+let _sql: ReturnType<typeof postgres> | null = null
 
 export function getDb() {
   if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL not set')
-  return neon(process.env.DATABASE_URL)
+  if (!_sql) _sql = postgres(process.env.DATABASE_URL, { max: 1 })
+  return _sql
 }
 
 export type Tool = {
