@@ -32,7 +32,8 @@ export async function GET(
 
   let tag = version
   if (!tag) {
-    tag = await getLatestTag(owner, name)
+    const [ghOwner, ghRepo] = ghPath.split('/')
+    tag = await getLatestTag(ghOwner, ghRepo)
     if (!tag) {
       return NextResponse.json({ error: 'no versions (git tags) found for this tool' }, { status: 404 })
     }
