@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compare — LiveFolders</title>
+  <meta name="description" content="LiveFolders vs MCP: detailed comparison, 7-system matrix, and three design principles from the research paper.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗂️</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav id="sidebar">
+    <div class="sidebar-header">&#x1f5c2;&#xfe0f; LIVEFOLDERS</div>
+    <ul>
+      <li><a href="/">&#x25ba; Home</a></li>
+      <li><a href="/usage.html">&#x25ba; Usage</a></li>
+      <li><a href="/features.html">&#x25ba; Features</a></li>
+      <li><a href="/compare.html">&#x25ba; Compare</a></li>
+      <li><a href="/install.html">&#x25ba; Install</a></li>
+    </ul>
+    <div style="border-top: 2px solid #888; margin: 0.25rem 0;"></div>
+    <ul>
+      <li><a href="/findings.html">&#x25ba; Findings</a></li>
+      <li><a href="https://github.com/natanloterio/LiveFolders" target="_blank" rel="noopener">&#x25ba; GitHub</a></li>
+    </ul>
+  </nav>
+  <div style="background: #000080; color: #FFD700; padding: 0.3rem 0; overflow: hidden; white-space: nowrap; font-family: 'Courier New', monospace; font-size: 0.85rem;">
+    <marquee>🗂️ LiveFolders v0.11.0 &mdash; Now with sandbox isolation &mdash; Landlock (Linux) + sandbox-exec (macOS) &mdash; network blocked by default, strict mode supported &mdash; Apache 2.0 &mdash; Star us on GitHub! &#x2605;</marquee>
+  </div>
+  <header class="page-header">
+    <div class="container">
+      <h1>&#x1f4ca; Compare</h1>
+    </div>
+  </header>
+  <nav style="background: #C0C0C0; border-bottom: 3px solid #111; border-top: 3px solid #111; padding: 0.4rem 0;">
+    <div class="container" style="display: flex; gap: 1.5rem; font-size: 0.9rem; font-weight: bold; flex-wrap: wrap;">
+      <a href="/" style="color: #000080;">Home</a>
+      <a href="/install.html" style="color: #000080;">Install</a>
+      <a href="https://github.com/natanloterio/LiveFolders" style="color: #000080;" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/natanloterio/LiveFolders/blob/master/README.md" style="color: #000080;" target="_blank" rel="noopener">Docs</a>
+      <a href="/findings.html" style="color: #800000;">Findings</a>
+      <a href="https://natanloterio.substack.com" style="color: #000080;" target="_blank" rel="noopener">Blog</a>
+    </div>
+  </nav>
+
+  <!-- VS MCP -->
+  <section id="vsmcp">
+    <div class="container">
+      <h2 class="section-header">LiveFolders vs MCP</h2>
+      <p style="margin-bottom: 1rem;">
+        MCP (Model Context Protocol) is the leading alternative. Both approaches are valid &mdash;
+        the right choice depends on your environment.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Criterion</th>
+            <th>LiveFolders</th>
+            <th>MCP</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Setup</td>
+            <td style="background:#F0FFF0;"><strong>6-line YAML, no runtime</strong></td>
+            <td>Python server + package install required</td>
+          </tr>
+          <tr>
+            <td>Hot-Reload</td>
+            <td style="background:#F0FFF0;"><strong>~1s, no restart</strong></td>
+            <td>Server kill + restart + reconnect (~1&ndash;3s)</td>
+          </tr>
+          <tr>
+            <td>Publishing</td>
+            <td style="background:#F0FFF0;"><strong>One GitHub URL, no registry</strong></td>
+            <td>No official registry; npm/PyPI or manual config</td>
+          </tr>
+          <tr>
+            <td>Discoverability</td>
+            <td style="background:#F0FFF0;"><strong>Human <code>how_to.md</code> + machine <code>schema.json</code></strong> (mirrors <code>list_tools</code>)</td>
+            <td>Typed JSON schema via <code>list_tools</code> (protocol-only)</td>
+          </tr>
+          <tr>
+            <td>Stateful Tools</td>
+            <td style="background:#F0FFF0;"><strong>Durable file state + <code>flock</code> locking</strong> &mdash; survives restarts, no handler-side coordination</td>
+            <td>In-process memory &mdash; fast but lost on server restart</td>
+          </tr>
+          <tr>
+            <td>Composability</td>
+            <td style="background:#F0FFF0;"><strong>Declarative <code>pipe:</code> chains</strong> &mdash; stdout&rarr;stdin in one LLM write, per-stage validation</td>
+            <td>Python function calls within one server; cross-server needs LLM orchestration</td>
+          </tr>
+          <tr>
+            <td>Observability</td>
+            <td style="background:#F0FFF0;"><strong><code>[ERROR:CODE] message</code> + <code>&lt;endpoint&gt;.log</code></strong> with timing &amp; stderr per invocation</td>
+            <td>Typed exception objects with stack context</td>
+          </tr>
+          <tr>
+            <td>LLM Compatibility</td>
+            <td>Shell-capable agents (Claude Code, POSIX environments);<br>
+            <code>anthropic_tools.json</code> enables structured tool calling without shell for API clients</td>
+            <td style="background:#F0FFF0;"><strong>Any MCP-native host</strong> incl. web clients</td>
+          </tr>
+          <tr>
+            <td>Token Efficiency</td>
+            <td style="background:#F0FFF0;"><strong>6&ndash;10% fewer tokens</strong> via <code>anthropic_tools.json</code> native schemas &mdash; 100% task completion across 8-task benchmark</td>
+            <td>Baseline (0%)</td>
+          </tr>
+          <tr>
+            <td>Input Validation</td>
+            <td>Opt-in per-endpoint: <code>min_length</code>, <code>max_length</code>, <code>pattern</code>, JSON <code>schema:</code></td>
+            <td style="background:#F0FFF0;"><strong>Unconditional at protocol layer</strong> &mdash; every tool validated automatically</td>
+          </tr>
+          <tr>
+            <td>Sandbox / Isolation</td>
+            <td style="background:#F0FFF0;"><strong>OS-enforced per handler</strong> &mdash; Landlock+seccomp (Linux), sandbox-exec (macOS); network blocked by default; strict mode aborts mount if unavailable</td>
+            <td>Process-level isolation depends on host; no built-in per-tool sandbox</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin-top: 0.75rem; font-style: italic; font-size: 0.9rem;">
+        Neither is universally better.
+        <a href="https://github.com/natanloterio/LiveFolders/blob/master/docs/livefoldersfs-vs-mcp.md" target="_blank" rel="noopener">
+          Read the full comparison &rarr;
+        </a>
+      </p>
+      <div class="pixel-box" style="margin-top: 1.25rem; background: #FFFFF0; border-color: #888; font-size: 0.9rem;">
+        <strong>Research backing:</strong> Multiple teams independently converged on the filesystem abstraction for LLM tool integration &mdash;
+        without coordination, across different languages and OS layers. This convergence motivated a systematic study.<br><br>
+        The paper <em>&ldquo;Files All the Way Down: A Design Space Analysis of Filesystem-Native LLM Tool Integration&rdquo;</em>
+        proposes a two-axis taxonomy (coupling depth &times; invocation interface), empirically evaluates seven systems
+        (LiveFolders, MCP, ToolFS, AgentFS, llm9p, InferNode, Quine) across ten criteria,
+        and derives three design principles from the observed tradeoffs.
+        Central finding: <strong>coupling depth predicts ergonomics ceiling; invocation interface predicts safety floor.</strong>
+        LiveFolders scores ✓ on 8 of 10 criteria (T1 live experiments).<br><br>
+        <strong>New &mdash; Token Efficiency Benchmark:</strong> LiveFoldersFS's native tool schema approach
+        (<code>anthropic_tools.json</code>) achieves <strong>6&ndash;10% lower token consumption than MCP</strong>
+        across an 8-task benchmark suite, with 100% task completion on all tasks. Server-side composition
+        (pipe chains, filter endpoints, get-by-ID handlers) provides the largest per-task gains on multi-step workloads.<br><br>
+        <strong>Notable findings from the survey:</strong> ToolFS's WASM sandbox was an unimplemented stub at T2 inspection (early 2025).
+        llm9p binds an unauthenticated TCP port accessible to any network process, the worst security finding in the survey.<br><br>
+        <a href="findings.html">See full empirical findings &rarr;</a>
+        &nbsp;&nbsp;
+        <a href="https://github.com/natanloterio/LiveFolders/tree/master/paper" target="_blank" rel="noopener">Read the paper &rarr;</a>
+      </div>
+    </div>
+  </section>
+  <hr>
+  <!-- FULL COMPARISON MATRIX -->
+  <section id="matrix">
+    <div class="container">
+      <h2 class="section-header">7-System Comparison Matrix</h2>
+      <p style="margin-bottom: 1rem; font-size: 1.05rem;">
+        The paper evaluates all seven systems across ten criteria using three evidence tiers:
+        <strong>T1</strong> = live experiments &middot; <strong>T2</strong> = structured assessment (code + install) &middot; <strong>T3</strong> = paper-only.
+        Rating: &#x2713; strong &middot; ~ partial &middot; &#x2717; weak &middot; &mdash; N/A.
+      </p>
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; font-size: 0.82rem; min-width: 640px;">
+          <thead>
+            <tr>
+              <th style="text-align:left;">Criterion</th>
+              <th style="background:#E0FFE0;">LiveFolders<br><span style="font-weight:normal;font-size:0.75rem;">T1</span></th>
+              <th>MCP<br><span style="font-weight:normal;font-size:0.75rem;">T1</span></th>
+              <th>ToolFS<br><span style="font-weight:normal;font-size:0.75rem;">T2</span></th>
+              <th>AgentFS<br><span style="font-weight:normal;font-size:0.75rem;">T2</span></th>
+              <th>llm9p<br><span style="font-weight:normal;font-size:0.75rem;">T2</span></th>
+              <th>InferNode<br><span style="font-weight:normal;font-size:0.75rem;">T3</span></th>
+              <th>Quine<br><span style="font-weight:normal;font-size:0.75rem;">T3</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>01 Setup complexity</td><td style="background:#E0FFE0;text-align:center;">&#x2713;</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">&#x2717;</td><td style="text-align:center;">~</td></tr>
+            <tr><td>02 LLM compatibility</td><td style="background:#E0FFE0;text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td></tr>
+            <tr><td>03 Discoverability</td><td style="background:#E0FFE0;text-align:center;">&#x2713;</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">&mdash;</td><td style="text-align:center;">&mdash;</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td></tr>
+            <tr><td>04 I/O expressiveness</td><td style="background:#E0FFE0;text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">&#x2713;</td></tr>
+            <tr><td>05 Security</td><td style="background:#E0FFE0;text-align:center;">&#x2713;</td><td style="text-align:center;">&#x2713;</td><td style="text-align:center;">~&nbsp;<sup title="WASM sandbox is an unimplemented stub">&#x26a0;</sup></td><td style="text-align:center;">~</td><td style="text-align:center;">&#x2717;&nbsp;<sup title="Unauthenticated TCP port — accessible to any network process">&#x26a0;</sup></td><td style="text-align:center;">&#x2713;</td><td style="text-align:center;">~</td></tr>
+            <tr><td>06 Stateful tools</td><td style="background:#E0FFE0;text-align:center;">&#x2713;</td><td style="text-align:center;">~</td><td style="text-align:center;">&#x2713;</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td></tr>
+            <tr><td>07 Composability</td><td style="background:#E0FFE0;text-align:center;">&#x2713;</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">&mdash;</td><td style="text-align:center;">~</td><td style="text-align:center;">&#x2713;</td><td style="text-align:center;">&#x2713;</td></tr>
+            <tr><td>08 Observability</td><td style="background:#E0FFE0;text-align:center;">&#x2713;</td><td style="text-align:center;">&#x2713;</td><td style="text-align:center;">~</td><td style="text-align:center;">&#x2713;</td><td style="text-align:center;">&#x2717;</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td></tr>
+            <tr><td>09 Hot-reload</td><td style="background:#E0FFE0;text-align:center;">&#x2713;</td><td style="text-align:center;">&#x2717;</td><td style="text-align:center;">&#x2717;</td><td style="text-align:center;">&mdash;</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td></tr>
+            <tr><td>10 Publishing</td><td style="background:#E0FFE0;text-align:center;">&#x2713;</td><td style="text-align:center;">~</td><td style="text-align:center;">~</td><td style="text-align:center;">&mdash;</td><td style="text-align:center;">&mdash;</td><td style="text-align:center;">&#x2717;</td><td style="text-align:center;">~</td></tr>
+            <tr style="font-weight:bold;border-top:3px solid #111;">
+              <td>&#x2713; count</td>
+              <td style="background:#E0FFE0;text-align:center;">8</td>
+              <td style="text-align:center;">3</td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;">0</td>
+              <td style="text-align:center;">3</td>
+              <td style="text-align:center;">2</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top: 0.5rem; font-size: 0.8rem; color: #555;">
+        &#x26a0; ToolFS criterion 05: documented WASM sandbox is an unimplemented stub (<code>InMemorySandbox</code>).
+        llm9p criterion 05: unauthenticated TCP port accessible to any network process.
+      </p>
+    </div>
+  </section>
+  <hr>
+  <!-- DESIGN PRINCIPLES -->
+  <section id="principles">
+    <div class="container">
+      <h2 class="section-header">Three Design Principles</h2>
+      <p style="margin-bottom: 1.25rem; font-size: 1.05rem;">
+        Derived from the empirical comparison in the paper:
+      </p>
+      <div class="feature-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+        <div class="feature-card" style="background: #E8F4FD;">
+          <h3>&#x1f4cf; Principle 1</h3>
+          <p><strong>Coupling depth determines ergonomics ceiling.</strong><br><br>
+          OS-coupled systems inherit decades of POSIX tooling — any shell command is immediately a tool handler.
+          The worked example shows this concretely: 10-line YAML vs 18-line Python, with the gap growing at scale.
+          The tradeoff is portability: cloud-hosted agents accessing tools over a network favor protocol-decoupled approaches.</p>
+        </div>
+        <div class="feature-card" style="background: #FFF5E6;">
+          <h3>&#x1f6e1;&#xfe0f; Principle 2</h3>
+          <p><strong>Invocation interface determines safety floor.</strong><br><br>
+          RPC systems (MCP) enforce input schemas unconditionally before any handler runs.
+          POSIX systems historically concentrated security on handler authors.
+          LiveFolders narrows this gap with opt-in per-endpoint validation + VFS-layer sandboxing (Landlock, seccomp-BPF).
+          The remaining gap: MCP validation is unconditional; LiveFolders requires explicit opt-in per endpoint.</p>
+        </div>
+        <div class="feature-card" style="background: #F0FFF0;">
+          <h3>&#x1f4e6; Principle 3</h3>
+          <p><strong>Publishing model is underexplored.</strong><br><br>
+          LiveFolders is the only surveyed system that treats tool distribution as a first-class design concern.
+          <code>livefolders install github.com/you/repo</code> requires no registry, no package upload, no config editing.
+          All other systems require manual configuration or informal community registries.
+          As the ecosystem matures, install friction will determine whether tool ecosystems grow organically or stay fragmented.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <hr>
+
+  <footer style="background: #000080; color: #FFFFFF; padding: 2rem 0; border-top: 6px solid #111;">
+    <div class="container">
+      <table role="presentation" style="border: none; width: 100%;">
+        <tr>
+          <td style="border: none; width: 33%; vertical-align: top;">
+            <strong style="font-size: 1.1rem;">LiveFolders</strong><br>
+            <span style="font-size: 0.85rem; color: #CCC;">Apache 2.0 License</span>
+          </td>
+          <td style="border: none; width: 34%; vertical-align: top; text-align: center;">
+            <a href="https://github.com/natanloterio/LiveFolders" style="color: #FFD700;" target="_blank" rel="noopener">GitHub</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://github.com/natanloterio/LiveFolders/blob/master/README.md" style="color: #FFD700;" target="_blank" rel="noopener">README</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://github.com/natanloterio/LiveFolders/blob/master/docs/livefoldersfs-vs-mcp.md" style="color: #FFD700;" target="_blank" rel="noopener">vs MCP</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://github.com/natanloterio/LiveFolders/tree/master/paper" style="color: #FFD700;" target="_blank" rel="noopener">Paper</a>
+          </td>
+          <td style="border: none; width: 33%; vertical-align: top; text-align: right; font-size: 0.85rem; color: #CCC;">
+            Made with &#x2665; and Rust &#x1f980;<br>
+            <span style="font-family: 'Courier New', monospace; color: #0F0;">[Visitors: 001337]</span>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('.code-box').forEach(function (box) {
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'position:relative;';
+        box.parentNode.insertBefore(wrapper, box);
+        wrapper.appendChild(box);
+
+        const btn = document.createElement('button');
+        btn.textContent = '[COPY]';
+        btn.style.cssText = [
+          'position:absolute', 'top:0.4rem', 'right:0.4rem',
+          'font-family:"Courier New",monospace', 'font-size:0.75rem',
+          'background:#222', 'color:#0F0', 'border:1px solid #0F0',
+          'padding:0.15rem 0.4rem', 'cursor:pointer', 'opacity:0',
+          'transition:opacity 0.15s'
+        ].join(';');
+
+        wrapper.addEventListener('mouseenter', function () { btn.style.opacity = '1'; });
+        wrapper.addEventListener('mouseleave', function () { btn.style.opacity = '0'; });
+
+        btn.addEventListener('click', function () {
+          navigator.clipboard.writeText(box.textContent).then(function () {
+            btn.textContent = '[COPIED!]';
+            setTimeout(function () { btn.textContent = '[COPY]'; }, 2000);
+          }).catch(function () {
+            btn.textContent = '[FAILED]';
+            setTimeout(function () { btn.textContent = '[COPY]'; }, 2000);
+          });
+        });
+
+        wrapper.appendChild(btn);
+      });
+
+      // Sidebar active page highlight
+      const path = window.location.pathname;
+      document.querySelectorAll('#sidebar a').forEach(function(link) {
+        const href = link.getAttribute('href');
+        if (href === path || (path === '/' && href === '/') || path.endsWith(href)) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
