@@ -12,4 +12,4 @@ CREATE TABLE IF NOT EXISTS tools (
 );
 
 CREATE INDEX IF NOT EXISTS tools_search_idx
-  ON tools USING GIN (to_tsvector('english', coalesce(name,'') || ' ' || coalesce(description,'') || ' ' || array_to_string(tags, ' ')));
+  ON tools USING GIN (to_tsvector('english', coalesce(name,'') || ' ' || coalesce(description,'')));

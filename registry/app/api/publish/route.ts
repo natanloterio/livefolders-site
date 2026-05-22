@@ -2,9 +2,22 @@ import { NextResponse } from 'next/server'
 import yaml from 'js-yaml'
 import { getDb } from '@/lib/db'
 import { verifyRepoOwnership, fetchRepoMeta } from '@/lib/github'
-import { checkRateLimit } from '@/lib/ratelimit'
+import { publishLimiter, checkRateLimit } from '@/lib/ratelimit'
+
+function getIp(req: Request): string {
+  return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
+}
 
 export async function POST(req: Request) {
+  const ip = getIp(req)
+  const rl = await checkRateLimit(publishLimiter, ip)
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: 'rate limit exceeded (10 publishes/hour per IP)' },
+      { status: 429, headers: { 'X-RateLimit-Remaining': '0', 'X-RateLimit-Reset': String(rl.reset) } }
+    )
+  }
+
   let body: { token?: string; repo?: string }
   try {
     body = await req.json()
@@ -31,10 +44,6 @@ export async function POST(req: Request) {
 
   if (login.toLowerCase() !== repoOwner.toLowerCase()) {
     return NextResponse.json({ error: 'token does not belong to repo owner' }, { status: 403 })
-  }
-
-  if (!checkRateLimit(login, 10, 60 * 60 * 1000)) {
-    return NextResponse.json({ error: 'rate limit exceeded (10 publishes/hour)' }, { status: 429 })
   }
 
   let meta

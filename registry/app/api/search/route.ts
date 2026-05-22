@@ -1,7 +1,21 @@
 import { NextResponse } from 'next/server'
 import { getDb } from '@/lib/db'
+import { searchLimiter, checkRateLimit } from '@/lib/ratelimit'
+
+function getIp(req: Request): string {
+  return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
+}
 
 export async function GET(req: Request) {
+  const ip = getIp(req)
+  const rl = await checkRateLimit(searchLimiter, ip)
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: 'rate limit exceeded (60 searches/minute per IP)' },
+      { status: 429, headers: { 'X-RateLimit-Remaining': '0', 'X-RateLimit-Reset': String(rl.reset) } }
+    )
+  }
+
   const { searchParams } = new URL(req.url)
   const q = searchParams.get('q')
   if (!q || q.trim().length === 0) {

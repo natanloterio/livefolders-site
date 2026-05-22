@@ -10,6 +10,8 @@
     "test": "jest"
   },
   "dependencies": {
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.38.0",
     "js-yaml": "^4.1.1",
     "next": "16.2.6",
     "postgres": "^3.4.9",
