@@ -102,6 +102,30 @@
         a directory of plain files. An LLM reads a file to call the tool &mdash; no JSON protocol,
         no SDK, no special client. Any agent that can run <code>cat</code> or <code>echo</code> can use it.
       </p>
+      <div class="code-box" style="margin-bottom: 1rem; font-size: 0.82rem; line-height: 1.5;">  cat .livefolders/tools/users/list
+          │
+          ▼
+  ┌───────────────────┐
+  │   LiveFoldersFS   │  FUSE virtual filesystem
+  └─────────┬─────────┘
+            │  spawns handler
+            ▼
+  ┌───────────────────┐
+  │   bash handler    │  curl -s https://api.example.com | jq ...
+  └─────────┬─────────┘
+            │  HTTP GET
+            ▼
+  ┌───────────────────┐
+  │    REST API       │  any HTTP endpoint
+  └─────────┬─────────┘
+            │  JSON response
+            ▼
+  ┌───────────────────┐
+  │   LiveFoldersFS   │  formats result as file content
+  └─────────┬─────────┘
+            │
+            ▼
+  cat output: # Users / ## Mr. Rudolph Robel-Fay / ID: 1 ...</div>
       <div class="code-box" style="margin-bottom: 1rem;">cat .livefolders/tools/users/list
 # &#x2192; # Users
 #
