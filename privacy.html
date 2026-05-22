@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — LiveFolders</title>
+  <meta name="description" content="LiveFolders Registry Privacy Policy — what data we collect, how we use it, and your rights.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗂️</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav id="sidebar">
+    <div class="sidebar-header">&#x1f5c2;&#xfe0f; LIVEFOLDERS</div>
+    <ul>
+      <li><a href="/">&#x25ba; Home</a></li>
+      <li><a href="/usage.html">&#x25ba; Usage</a></li>
+      <li><a href="/features.html">&#x25ba; Features</a></li>
+      <li><a href="/compare.html">&#x25ba; Compare</a></li>
+      <li><a href="/install.html">&#x25ba; Install</a></li>
+    </ul>
+    <div style="border-top: 2px solid #888; margin: 0.25rem 0;"></div>
+    <ul>
+      <li><a href="/findings.html">&#x25ba; Findings</a></li>
+      <li><a href="https://github.com/natanloterio/LiveFolders" target="_blank" rel="noopener">&#x25ba; GitHub</a></li>
+    </ul>
+  </nav>
+  <div style="background: #000080; color: #FFD700; padding: 0.3rem 0; overflow: hidden; white-space: nowrap; font-family: 'Courier New', monospace; font-size: 0.85rem;">
+    <marquee>🗂️ LiveFolders v0.11.0 &mdash; Now with sandbox isolation &mdash; Landlock (Linux) + sandbox-exec (macOS) &mdash; network blocked by default, strict mode supported &mdash; Apache 2.0 &mdash; Star us on GitHub! &#x2605;</marquee>
+  </div>
+  <header class="page-header">
+    <div class="container">
+      <h1>&#x25bc; Privacy Policy</h1>
+    </div>
+  </header>
+  <nav style="background: #C0C0C0; border-bottom: 3px solid #111; border-top: 3px solid #111; padding: 0.4rem 0;">
+    <div class="container" style="display: flex; gap: 1.5rem; font-size: 0.9rem; font-weight: bold; flex-wrap: wrap;">
+      <a href="/" style="color: #000080;">Home</a>
+      <a href="/install.html" style="color: #000080;">Install</a>
+      <a href="https://github.com/natanloterio/LiveFolders" style="color: #000080;" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/natanloterio/LiveFolders/blob/master/README.md" style="color: #000080;" target="_blank" rel="noopener">Docs</a>
+      <a href="/findings.html" style="color: #800000;">Findings</a>
+      <a href="https://natanloterio.substack.com" style="color: #000080;" target="_blank" rel="noopener">Blog</a>
+    </div>
+  </nav>
+
+  <section>
+    <div class="container">
+      <p style="font-size: 0.85rem; color: #555;">Effective date: 2026-05-22</p>
+
+      <h2 class="section-header">1. What We Collect</h2>
+      <p>When a tool is published to the LiveFolders Registry, we store:</p>
+      <ul>
+        <li>GitHub username (owner) and repository name</li>
+        <li>Repository description and public URL</li>
+        <li>Download count (incremented on each <code>livefolders install</code>)</li>
+        <li>Timestamps for creation and last update</li>
+        <li>Tags declared in <code>folder.yaml</code></li>
+      </ul>
+      <p>We do <strong>not</strong> collect email addresses, personal profiles, or any data from end-users who install tools. IP addresses are held transiently for rate-limiting only (see §4).</p>
+
+      <h2 class="section-header">2. How We Use It</h2>
+      <ul>
+        <li>Display tool listings on the registry website</li>
+        <li>Serve install metadata to the <code>livefolders</code> CLI</li>
+        <li>Show download statistics to publishers and users</li>
+      </ul>
+      <p>We do not sell or share data with third parties for advertising purposes.</p>
+
+      <h2 class="section-header">3. GitHub OAuth Tokens</h2>
+      <p>
+        Publishing a tool requires a GitHub personal access token to verify repo ownership.
+        Tokens are used only to authenticate the publish request against the GitHub API and
+        are <strong>never stored</strong> in our database.
+      </p>
+
+      <h2 class="section-header">4. Rate-Limiting</h2>
+      <p>
+        IP addresses are passed to Upstash Redis solely to enforce rate limits
+        (10 publishes per hour, 60 searches per minute). They are not logged or retained
+        beyond the rate-limit window.
+      </p>
+
+      <h2 class="section-header">5. Third-Party Services</h2>
+      <ul>
+        <li><strong>Neon / PostgreSQL</strong> &mdash; tool metadata storage</li>
+        <li><strong>Upstash Redis</strong> &mdash; ephemeral rate-limit counters</li>
+        <li><strong>GitHub API</strong> &mdash; repo ownership verification and tag lookups</li>
+        <li><strong>Vercel</strong> &mdash; hosting and edge CDN</li>
+      </ul>
+      <p>Each provider operates under its own privacy policy. No personally identifiable information beyond what is described above is shared with them.</p>
+
+      <h2 class="section-header">6. Data Retention</h2>
+      <p>
+        Registry entries persist until a publisher requests removal or deletes their
+        GitHub repository. Contact us (see below) to request deletion of your listing.
+      </p>
+
+      <h2 class="section-header">7. Your Rights</h2>
+      <p>
+        You may request access to or deletion of your tool&rsquo;s registry entry at any time
+        by opening an issue on the
+        <a href="https://github.com/natanloterio/LiveFolders" target="_blank" rel="noopener">LiveFolders GitHub repository</a>
+        or emailing <strong>natan@gaiahub.ai</strong>.
+      </p>
+
+      <h2 class="section-header">8. Changes to This Policy</h2>
+      <p>
+        Material changes will be announced via the LiveFolders GitHub repository.
+        Continued use of the registry after changes constitutes acceptance.
+      </p>
+    </div>
+  </section>
+  <hr>
+
+  <footer style="background: #000080; color: #FFFFFF; padding: 2rem 0; border-top: 6px solid #111;">
+    <div class="container">
+      <table role="presentation" style="border: none; width: 100%;">
+        <tr>
+          <td style="border: none; width: 33%; vertical-align: top;">
+            <strong style="font-size: 1.1rem;">LiveFolders</strong><br>
+            <span style="font-size: 0.85rem; color: #CCC;">Apache 2.0 License</span>
+          </td>
+          <td style="border: none; width: 34%; vertical-align: top; text-align: center;">
+            <a href="https://github.com/natanloterio/LiveFolders" style="color: #FFD700;" target="_blank" rel="noopener">GitHub</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://github.com/natanloterio/LiveFolders/blob/master/README.md" style="color: #FFD700;" target="_blank" rel="noopener">README</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://github.com/natanloterio/LiveFolders/blob/master/docs/livefoldersfs-vs-mcp.md" style="color: #FFD700;" target="_blank" rel="noopener">vs MCP</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://github.com/natanloterio/LiveFolders/tree/master/paper" style="color: #FFD700;" target="_blank" rel="noopener">Paper</a>
+            <br>
+            <a href="/privacy" style="color: #FFD700;">Privacy</a>
+            &nbsp;&middot;&nbsp;
+            <a href="/terms" style="color: #FFD700;">Terms</a>
+            &nbsp;&middot;&nbsp;
+            <a href="/security" style="color: #FFD700;">Security</a>
+          </td>
+          <td style="border: none; width: 33%; vertical-align: top; text-align: right; font-size: 0.85rem; color: #CCC;">
+            Made with &#x2665; and Rust &#x1f980;<br>
+            <span style="font-family: 'Courier New', monospace; color: #0F0;">[Visitors: 001337]</span>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Security — LiveFolders</title>
+  <meta name="description" content="LiveFolders security policy — how to report vulnerabilities, incident management, and known limitations.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2020/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗂️</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav id="sidebar">
+    <div class="sidebar-header">&#x1f5c2;&#xfe0f; LIVEFOLDERS</div>
+    <ul>
+      <li><a href="/">&#x25ba; Home</a></li>
+      <li><a href="/usage.html">&#x25ba; Usage</a></li>
+      <li><a href="/features.html">&#x25ba; Features</a></li>
+      <li><a href="/compare.html">&#x25ba; Compare</a></li>
+      <li><a href="/install.html">&#x25ba; Install</a></li>
+    </ul>
+    <div style="border-top: 2px solid #888; margin: 0.25rem 0;"></div>
+    <ul>
+      <li><a href="/findings.html">&#x25ba; Findings</a></li>
+      <li><a href="https://github.com/natanloterio/LiveFolders" target="_blank" rel="noopener">&#x25ba; GitHub</a></li>
+    </ul>
+  </nav>
+  <div style="background: #000080; color: #FFD700; padding: 0.3rem 0; overflow: hidden; white-space: nowrap; font-family: 'Courier New', monospace; font-size: 0.85rem;">
+    <marquee>🗂️ LiveFolders v0.11.0 &mdash; Now with sandbox isolation &mdash; Landlock (Linux) + sandbox-exec (macOS) &mdash; network blocked by default, strict mode supported &mdash; Apache 2.0 &mdash; Star us on GitHub! &#x2605;</marquee>
+  </div>
+  <header class="page-header">
+    <div class="container">
+      <h1>&#x25bc; Security</h1>
+    </div>
+  </header>
+  <nav style="background: #C0C0C0; border-bottom: 3px solid #111; border-top: 3px solid #111; padding: 0.4rem 0;">
+    <div class="container" style="display: flex; gap: 1.5rem; font-size: 0.9rem; font-weight: bold; flex-wrap: wrap;">
+      <a href="/" style="color: #000080;">Home</a>
+      <a href="/install.html" style="color: #000080;">Install</a>
+      <a href="https://github.com/natanloterio/LiveFolders" style="color: #000080;" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/natanloterio/LiveFolders/blob/master/README.md" style="color: #000080;" target="_blank" rel="noopener">Docs</a>
+      <a href="/findings.html" style="color: #800000;">Findings</a>
+      <a href="https://natanloterio.substack.com" style="color: #000080;" target="_blank" rel="noopener">Blog</a>
+    </div>
+  </nav>
+
+  <section>
+    <div class="container">
+
+      <h2 class="section-header">Reporting a Vulnerability</h2>
+      <p>If you discover a security vulnerability in the LiveFolders Registry or CLI, please report it responsibly:</p>
+      <ol>
+        <li><strong>Do not</strong> open a public GitHub issue for security vulnerabilities.</li>
+        <li>
+          Email <strong>natan@gaiahub.ai</strong> with subject line
+          <code>[SECURITY] LiveFolders &mdash; &lt;brief summary&gt;</code>.
+        </li>
+        <li>Include a description of the issue, reproduction steps, and potential impact.</li>
+      </ol>
+      <p>
+        We aim to acknowledge reports within <strong>2 business days</strong> and provide
+        a resolution timeline within <strong>7 business days</strong>.
+      </p>
+
+      <h2 class="section-header">Incident Management</h2>
+      <p>The LiveFolders Registry uses the following controls to protect the service and its users:</p>
+      <ul>
+        <li><strong>Rate limiting</strong> &mdash; All API endpoints enforce per-IP rate limits via Upstash Redis to prevent abuse.</li>
+        <li><strong>Input validation</strong> &mdash; Publish requests validate GitHub token ownership before any write occurs. YAML payloads are parsed and rejected on malformed input.</li>
+        <li><strong>No secret storage</strong> &mdash; GitHub tokens are never persisted; they are used only in-flight to verify ownership.</li>
+        <li><strong>Parameterized queries</strong> &mdash; All database access uses parameterized SQL to prevent injection.</li>
+        <li><strong>Dependency scanning</strong> &mdash; Dependencies are reviewed on each deployment; critical CVEs trigger immediate patch releases.</li>
+      </ul>
+
+      <h2 class="section-header">Known Limitations</h2>
+      <ul>
+        <li>
+          The Registry does not scan or vet the <em>contents</em> of published tool repositories.
+          Users should review source code before installing any third-party tool.
+        </li>
+        <li>
+          Tool installs execute on the user&rsquo;s machine. The CLI does not sandbox execution
+          at install time; treat all tools as untrusted code unless you have audited the source.
+        </li>
+      </ul>
+
+      <h2 class="section-header">Scope</h2>
+      <p>The following are in scope for responsible disclosure:</p>
+      <ul>
+        <li>Authentication or authorization bypass on the publish API</li>
+        <li>SQL injection or data exfiltration from the registry database</li>
+        <li>Rate-limit bypass allowing registry spam</li>
+        <li>Malicious package injection / namespace squatting</li>
+      </ul>
+    </div>
+  </section>
+  <hr>
+
+  <footer style="background: #000080; color: #FFFFFF; padding: 2rem 0; border-top: 6px solid #111;">
+    <div class="container">
+      <table role="presentation" style="border: none; width: 100%;">
+        <tr>
+          <td style="border: none; width: 33%; vertical-align: top;">
+            <strong style="font-size: 1.1rem;">LiveFolders</strong><br>
+            <span style="font-size: 0.85rem; color: #CCC;">Apache 2.0 License</span>
+          </td>
+          <td style="border: none; width: 34%; vertical-align: top; text-align: center;">
+            <a href="https://github.com/natanloterio/LiveFolders" style="color: #FFD700;" target="_blank" rel="noopener">GitHub</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://github.com/natanloterio/LiveFolders/blob/master/README.md" style="color: #FFD700;" target="_blank" rel="noopener">README</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://github.com/natanloterio/LiveFolders/blob/master/docs/livefoldersfs-vs-mcp.md" style="color: #FFD700;" target="_blank" rel="noopener">vs MCP</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://github.com/natanloterio/LiveFolders/tree/master/paper" style="color: #FFD700;" target="_blank" rel="noopener">Paper</a>
+            <br>
+            <a href="/privacy" style="color: #FFD700;">Privacy</a>
+            &nbsp;&middot;&nbsp;
+            <a href="/terms" style="color: #FFD700;">Terms</a>
+            &nbsp;&middot;&nbsp;
+            <a href="/security" style="color: #FFD700;">Security</a>
+          </td>
+          <td style="border: none; width: 33%; vertical-align: top; text-align: right; font-size: 0.85rem; color: #CCC;">
+            Made with &#x2665; and Rust &#x1f980;<br>
+            <span style="font-family: 'Courier New', monospace; color: #0F0;">[Visitors: 001337]</span>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </footer>
+</body>
+</html>
