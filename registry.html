@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registry — LiveFolders</title>
+  <meta name="description" content="The LiveFolders Registry — discover, install, and publish tools. Browse the public index or publish your own folder.yaml tool in minutes.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗂️</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav id="sidebar">
+    <div class="sidebar-header">&#x1f5c2;&#xfe0f; LIVEFOLDERS</div>
+    <ul>
+      <li><a href="/">&#x25ba; Home</a></li>
+      <li><a href="/usage.html">&#x25ba; Usage</a></li>
+      <li><a href="/features.html">&#x25ba; Features</a></li>
+      <li><a href="/compare.html">&#x25ba; Compare</a></li>
+      <li><a href="/install.html">&#x25ba; Install</a></li>
+      <li><a href="/registry.html">&#x25ba; Registry</a></li>
+    </ul>
+    <div style="border-top: 2px solid #888; margin: 0.25rem 0;"></div>
+    <ul>
+      <li><a href="/findings.html">&#x25ba; Findings</a></li>
+      <li><a href="https://github.com/natanloterio/LiveFolders" target="_blank" rel="noopener">&#x25ba; GitHub</a></li>
+    </ul>
+  </nav>
+  <div style="background: #000080; color: #FFD700; padding: 0.3rem 0; overflow: hidden; white-space: nowrap; font-family: 'Courier New', monospace; font-size: 0.85rem;">
+    <marquee>🗂️ LiveFolders v0.11.0 &mdash; Now with sandbox isolation &mdash; Landlock (Linux) + sandbox-exec (macOS) &mdash; network blocked by default, strict mode supported &mdash; Apache 2.0 &mdash; Star us on GitHub! &#x2605;</marquee>
+  </div>
+  <header class="page-header">
+    <div class="container">
+      <h1>&#x1f4e6; Registry</h1>
+    </div>
+  </header>
+  <nav style="background: #C0C0C0; border-bottom: 3px solid #111; border-top: 3px solid #111; padding: 0.4rem 0;">
+    <div class="container" style="display: flex; gap: 1.5rem; font-size: 0.9rem; font-weight: bold; flex-wrap: wrap;">
+      <a href="/" style="color: #000080;">Home</a>
+      <a href="/install.html" style="color: #000080;">Install</a>
+      <a href="https://github.com/natanloterio/LiveFolders" style="color: #000080;" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/natanloterio/LiveFolders/blob/master/README.md" style="color: #000080;" target="_blank" rel="noopener">Docs</a>
+      <a href="/findings.html" style="color: #800000;">Findings</a>
+      <a href="https://natanloterio.substack.com" style="color: #000080;" target="_blank" rel="noopener">Blog</a>
+    </div>
+  </nav>
+
+  <!-- WHAT IS THE REGISTRY -->
+  <section id="what">
+    <div class="container">
+      <h2 class="section-header">What Is the Registry?</h2>
+      <p style="margin-bottom: 1rem;">
+        The <strong>LiveFolders Registry</strong> is a public index of community-built tools.
+        Each entry points to a GitHub repository containing a <code>folder.yaml</code> manifest
+        &mdash; the single file that defines how a LiveFolders tool behaves.
+        The registry tracks the tool name, description, download count, and source URL.
+        Nothing is hosted centrally; tools live in their authors&rsquo; GitHub repos.
+      </p>
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
+        <a href="https://registry.livefoldersfs.org" class="btn btn-gold" target="_blank" rel="noopener">
+          &#x1f50d; Browse the Registry
+        </a>
+        <a href="#publish" class="btn btn-teal">
+          &#x25ba; Publish a Tool
+        </a>
+      </div>
+    </div>
+  </section>
+  <hr>
+
+  <!-- INSTALLING FROM THE REGISTRY -->
+  <section id="install">
+    <div class="container">
+      <h2 class="section-header">Installing Tools</h2>
+      <p style="margin-bottom: 0.75rem;">
+        Once you have LiveFolders installed, any registry tool is one command away:
+      </p>
+      <div class="code-box" style="margin-bottom: 1.25rem;"># Install by owner/name slug
+livefolders install owner/toolname
+
+# Install a specific version (git tag)
+livefolders install owner/toolname@v1.2.0
+
+# Install, then mount to make it available immediately
+livefolders install owner/toolname &amp;&amp; livefolders mount</div>
+
+      <p style="margin-bottom: 0.75rem;">
+        The CLI resolves the slug through the registry API, clones or downloads the
+        <code>folder.yaml</code> from the source repository, and adds the tool to your
+        local config. Re-running <code>livefolders mount</code> (or if it&rsquo;s already running,
+        the hot-reload picks it up within ~1 second) makes the tool&rsquo;s files appear under
+        <code>.livefolders/tools/&lt;name&gt;/</code>.
+      </p>
+
+      <p style="margin-bottom: 0.75rem;">You can also search the registry from the command line or browse it on the web:</p>
+      <table style="width: auto; margin-bottom: 1rem;">
+        <thead><tr><th>Action</th><th>Command / URL</th></tr></thead>
+        <tbody>
+          <tr><td>Install</td><td><code>livefolders install owner/name</code></td></tr>
+          <tr><td>Search (web)</td><td><a href="https://registry.livefoldersfs.org" target="_blank" rel="noopener">registry.livefoldersfs.org</a></td></tr>
+          <tr><td>Tool detail page</td><td><code>registry.livefoldersfs.org/owner/name</code></td></tr>
+          <tr><td>Resolve API</td><td><code>GET /api/resolve/owner/name</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <hr>
+
+  <!-- PUBLISHING -->
+  <section id="publish">
+    <div class="container">
+      <h2 class="section-header">Publishing a Tool</h2>
+      <p style="margin-bottom: 1.25rem;">
+        Publishing is free and open to anyone. You need a public GitHub repository with a
+        <code>folder.yaml</code> in the root. The registry verifies ownership via a GitHub
+        personal access token &mdash; the token is used in-flight and never stored.
+      </p>
+
+      <h3 style="font-size: 1.1rem; text-transform: uppercase; border-bottom: 2px solid #111; padding-bottom: 0.3rem; margin-bottom: 0.75rem;">
+        Step 1 &mdash; Create your folder.yaml
+      </h3>
+      <p style="margin-bottom: 0.5rem;">
+        Place a <code>folder.yaml</code> in the root of your GitHub repository.
+        Here is a minimal example:
+      </p>
+      <div class="code-box" style="margin-bottom: 1.25rem;">name: myweather
+description: Get current weather for any city.
+files:
+  - name: forecast
+    type: write_invoke
+    description: Write a city name, read back the forecast.
+    input:
+      type: string
+      min_length: 1
+      max_length: 100
+    handler: &gt;-
+      curl -s "https://wttr.in/${LIVEFOLDERS_INPUT}?format=3"
+  - name: how_to.md
+    type: readonly</div>
+
+      <p style="margin-bottom: 0.5rem;">See the full <code>folder.yaml</code> reference below for all supported fields.</p>
+
+      <h3 style="font-size: 1.1rem; text-transform: uppercase; border-bottom: 2px solid #111; padding-bottom: 0.3rem; margin-bottom: 0.75rem; margin-top: 1.5rem;">
+        Step 2 &mdash; Create a GitHub personal access token
+      </h3>
+      <p style="margin-bottom: 0.75rem;">
+        Go to <strong>GitHub &rarr; Settings &rarr; Developer settings &rarr; Personal access tokens</strong>
+        and create a fine-grained token (or classic token) with at least <strong>read access to repository contents</strong>
+        for the repo you want to publish.
+        The token is only used to confirm you own the repo; it is discarded after the request.
+      </p>
+
+      <h3 style="font-size: 1.1rem; text-transform: uppercase; border-bottom: 2px solid #111; padding-bottom: 0.3rem; margin-bottom: 0.75rem; margin-top: 1.5rem;">
+        Step 3 &mdash; Publish
+      </h3>
+      <p style="margin-bottom: 0.5rem;">Post to the registry API:</p>
+      <div class="code-box" style="margin-bottom: 0.75rem;">curl -s -X POST https://registry.livefoldersfs.org/api/publish \
+  -H "Content-Type: application/json" \
+  -d '{"token": "ghp_YOUR_TOKEN", "repo": "your-github-username/your-repo"}'</div>
+      <p style="margin-bottom: 0.75rem;">On success:</p>
+      <div class="code-box" style="margin-bottom: 1.25rem;">{"ok":true,"url":"https://registry.livefoldersfs.org/your-github-username/your-repo"}</div>
+
+      <div class="pixel-box" style="background: #FFF8E7; margin-bottom: 1rem;">
+        <strong>&#x26a0; Rate limit:</strong> 10 publishes per hour per IP.
+        Re-publishing the same repo updates the existing listing (description, timestamps).
+        Download counts are preserved.
+      </div>
+
+      <h3 style="font-size: 1.1rem; text-transform: uppercase; border-bottom: 2px solid #111; padding-bottom: 0.3rem; margin-bottom: 0.75rem; margin-top: 1.5rem;">
+        What gets listed
+      </h3>
+      <table style="width: auto; margin-bottom: 0.5rem;">
+        <thead><tr><th>Field</th><th>Source</th></tr></thead>
+        <tbody>
+          <tr><td>Name</td><td>GitHub repo slug (<code>owner/name</code>)</td></tr>
+          <tr><td>Description</td><td>GitHub repository description</td></tr>
+          <tr><td>Repository URL</td><td>GitHub repo HTML URL</td></tr>
+          <tr><td>Download count</td><td>Incremented on each <code>livefolders install</code></td></tr>
+          <tr><td>Versions</td><td>Git tags on the repository</td></tr>
+          <tr><td>Published / Updated</td><td>Timestamps set by the registry</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size: 0.88rem; color: #555; margin-top: 0.5rem;">
+        Set a clear GitHub repo description before publishing &mdash; it becomes your tool&rsquo;s tagline in the index.
+      </p>
+    </div>
+  </section>
+  <hr>
+
+  <!-- FOLDER.YAML REFERENCE -->
+  <section id="yaml">
+    <div class="container">
+      <h2 class="section-header">folder.yaml Reference</h2>
+      <p style="margin-bottom: 1.25rem;">
+        A <code>folder.yaml</code> is 6&ndash;50 lines of YAML. No server process, no imports,
+        no build step. The LiveFolders runtime reads it at mount time and hot-reloads it within
+        ~1 second whenever you save a change.
+      </p>
+
+      <h3 style="font-size: 1.1rem; text-transform: uppercase; border-bottom: 2px solid #111; padding-bottom: 0.3rem; margin-bottom: 0.75rem;">
+        Top-level fields
+      </h3>
+      <table style="margin-bottom: 1.5rem;">
+        <thead><tr><th>Field</th><th>Required</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>name</code></td><td>Yes</td><td>Tool name &mdash; becomes the directory under <code>.livefolders/tools/</code></td></tr>
+          <tr><td><code>description</code></td><td>Yes</td><td>One-line summary shown in <code>index.md</code> and the registry</td></tr>
+          <tr><td><code>files</code></td><td>Yes</td><td>List of virtual file definitions (see below)</td></tr>
+          <tr><td><code>secrets</code></td><td>No</td><td>List of required env var names; users prompted at install</td></tr>
+          <tr><td><code>state_file</code></td><td>No</td><td>Path to a persistent state file; injected as <code>LIVEFOLDERS_STATE_FILE</code></td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="font-size: 1.1rem; text-transform: uppercase; border-bottom: 2px solid #111; padding-bottom: 0.3rem; margin-bottom: 0.75rem;">
+        File types
+      </h3>
+      <table style="margin-bottom: 1.5rem;">
+        <thead><tr><th>Type</th><th>Trigger</th><th>Use when&hellip;</th></tr></thead>
+        <tbody>
+          <tr><td><code>read_invoke</code></td><td>LLM reads the file</td><td>No input needed &mdash; e.g. fetch a list, get current status</td></tr>
+          <tr><td><code>write_invoke</code></td><td>LLM writes the file</td><td>Input required &mdash; e.g. query, transform, command</td></tr>
+          <tr><td><code>readonly</code></td><td>&mdash;</td><td>Static content; no handler runs &mdash; good for <code>how_to.md</code></td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="font-size: 1.1rem; text-transform: uppercase; border-bottom: 2px solid #111; padding-bottom: 0.3rem; margin-bottom: 0.75rem;">
+        Per-file fields
+      </h3>
+      <table style="margin-bottom: 1.5rem;">
+        <thead><tr><th>Field</th><th>Applies to</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>name</code></td><td>All</td><td>Filename in the virtual directory</td></tr>
+          <tr><td><code>type</code></td><td>All</td><td><code>read_invoke</code>, <code>write_invoke</code>, or <code>readonly</code></td></tr>
+          <tr><td><code>description</code></td><td>All</td><td>Shown in <code>how_to.md</code> and <code>schema.json</code></td></tr>
+          <tr><td><code>handler</code></td><td>Invoke types</td><td>Shell command or script path to execute</td></tr>
+          <tr><td><code>input.type</code></td><td><code>write_invoke</code></td><td><code>string</code> or <code>json</code></td></tr>
+          <tr><td><code>input.min_length</code></td><td><code>write_invoke</code></td><td>Minimum input byte length</td></tr>
+          <tr><td><code>input.max_length</code></td><td><code>write_invoke</code></td><td>Maximum input byte length</td></tr>
+          <tr><td><code>input.pattern</code></td><td><code>write_invoke</code></td><td>Regex the input must match</td></tr>
+          <tr><td><code>input.schema</code></td><td><code>write_invoke</code></td><td>JSON Schema block for structured input</td></tr>
+          <tr><td><code>timeout</code></td><td>Invoke types</td><td>Seconds before the handler is killed (default: 30)</td></tr>
+          <tr><td><code>network</code></td><td>Invoke types</td><td><code>true</code> to allow outbound network (sandbox default: blocked)</td></tr>
+          <tr><td><code>pipe</code></td><td>Invoke types</td><td>List of endpoint names to chain &mdash; stdout of one feeds stdin of next</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="font-size: 1.1rem; text-transform: uppercase; border-bottom: 2px solid #111; padding-bottom: 0.3rem; margin-bottom: 0.75rem;">
+        Full example
+      </h3>
+      <div class="code-box">name: devtools
+description: A set of developer utilities — base64, JSON format, and UUID generation.
+secrets:
+  - OPENAI_API_KEY       # prompted at install, stored in secrets.env
+files:
+  - name: how_to.md
+    type: readonly
+
+  - name: b64encode
+    type: write_invoke
+    description: Base64-encode any string.
+    input:
+      type: string
+      min_length: 1
+      max_length: 4096
+    handler: echo -n "${LIVEFOLDERS_INPUT}" | base64
+
+  - name: jsonformat
+    type: write_invoke
+    description: Pretty-print JSON.
+    input:
+      type: json
+    handler: echo "${LIVEFOLDERS_INPUT}" | jq .
+
+  - name: uuid
+    type: read_invoke
+    description: Generate a random UUID v4.
+    handler: python3 -c "import uuid; print(uuid.uuid4())"
+
+  - name: summarise
+    type: write_invoke
+    description: Summarise any text with GPT-4o-mini.
+    network: true
+    input:
+      type: string
+      min_length: 10
+    handler: &gt;-
+      curl -s https://api.openai.com/v1/chat/completions \
+        -H "Authorization: Bearer ${OPENAI_API_KEY}" \
+        -H "Content-Type: application/json" \
+        -d "{\"model\":\"gpt-4o-mini\",\"messages\":[{\"role\":\"user\",\"content\":\"Summarise: ${LIVEFOLDERS_INPUT}\"}]}" \
+      | jq -r '.choices[0].message.content'</div>
+    </div>
+  </section>
+  <hr>
+
+  <!-- BEST PRACTICES -->
+  <section id="tips">
+    <div class="container">
+      <h2 class="section-header">Tips for a Good Listing</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h3>&#x2713; Write a clear repo description</h3>
+          <p>The GitHub repository description becomes your tool&rsquo;s one-liner in search results. Keep it under 80 characters and lead with what the tool <em>does</em>, not what it is.</p>
+        </div>
+        <div class="feature-card">
+          <h3>&#x2713; Add a how_to.md file</h3>
+          <p>A <code>readonly</code> file named <code>how_to.md</code> is the first thing an LLM reads. Describe each endpoint, expected inputs, and example outputs. The runtime auto-generates a basic version if you omit it, but a hand-crafted one is better.</p>
+        </div>
+        <div class="feature-card">
+          <h3>&#x2713; Validate all inputs</h3>
+          <p>Use <code>min_length</code>, <code>max_length</code>, <code>pattern</code>, and <code>schema</code> to reject bad input before the handler runs. The runtime returns a structured <code>[ERROR:INVALID_INPUT]</code> message &mdash; LLMs handle these cleanly.</p>
+        </div>
+        <div class="feature-card">
+          <h3>&#x2713; Tag your releases</h3>
+          <p>Git tags become installable versions: <code>livefolders install owner/name@v1.0.0</code>. Push a tag before publishing so users can pin to a stable release.</p>
+        </div>
+        <div class="feature-card">
+          <h3>&#x2713; Declare secrets up front</h3>
+          <p>If your tool needs an API key, list it under <code>secrets:</code>. Users are prompted at install time and the key is stored in a local <code>secrets.env</code>. Never hardcode credentials in the handler.</p>
+        </div>
+        <div class="feature-card">
+          <h3>&#x2713; Set network: true only if needed</h3>
+          <p>The sandbox blocks outbound network by default &mdash; a good default for tools that don&rsquo;t need it. Only set <code>network: true</code> on endpoints that genuinely call external services, so users can see exactly what reaches the internet.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <hr>
+
+  <!-- API REFERENCE -->
+  <section id="api">
+    <div class="container">
+      <h2 class="section-header">Registry API</h2>
+      <p style="margin-bottom: 1rem;">
+        The registry exposes a small REST API consumed by the CLI and available for integrations.
+        All endpoints return JSON. Rate limits apply per IP.
+      </p>
+      <table style="margin-bottom: 1rem;">
+        <thead><tr><th>Endpoint</th><th>Method</th><th>Description</th><th>Rate limit</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>/api/publish</code></td>
+            <td><code>POST</code></td>
+            <td>Publish or update a tool listing</td>
+            <td>10 / hour</td>
+          </tr>
+          <tr>
+            <td><code>/api/search?q=</code></td>
+            <td><code>GET</code></td>
+            <td>Full-text search across name, description, and tags</td>
+            <td>60 / minute</td>
+          </tr>
+          <tr>
+            <td><code>/api/resolve/:owner/:name</code></td>
+            <td><code>GET</code></td>
+            <td>Resolve a slug to repo URL and metadata (used by the CLI)</td>
+            <td>60 / minute</td>
+          </tr>
+          <tr>
+            <td><code>/api/tools/:owner/:name</code></td>
+            <td><code>GET</code></td>
+            <td>Full tool record (all stored fields)</td>
+            <td>60 / minute</td>
+          </tr>
+          <tr>
+            <td><code>/api/tools/:owner/:name/downloads</code></td>
+            <td><code>POST</code></td>
+            <td>Increment download counter (called by CLI on install)</td>
+            <td>30 / minute</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin-bottom: 0.5rem;"><strong>Publish request body:</strong></p>
+      <div class="code-box" style="margin-bottom: 1rem;">POST /api/publish
+Content-Type: application/json
+
+{
+  "token": "ghp_YOUR_GITHUB_TOKEN",
+  "repo":  "owner/repo-name"
+}</div>
+      <p style="margin-bottom: 0.5rem;"><strong>Search example:</strong></p>
+      <div class="code-box">curl "https://registry.livefoldersfs.org/api/search?q=weather"</div>
+    </div>
+  </section>
+  <hr>
+
+  <footer style="background: #000080; color: #FFFFFF; padding: 2rem 0; border-top: 6px solid #111;">
+    <div class="container">
+      <table role="presentation" style="border: none; width: 100%;">
+        <tr>
+          <td style="border: none; width: 33%; vertical-align: top;">
+            <strong style="font-size: 1.1rem;">LiveFolders</strong><br>
+            <span style="font-size: 0.85rem; color: #CCC;">Apache 2.0 License</span>
+          </td>
+          <td style="border: none; width: 34%; vertical-align: top; text-align: center;">
+            <a href="https://github.com/natanloterio/LiveFolders" style="color: #FFD700;" target="_blank" rel="noopener">GitHub</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://github.com/natanloterio/LiveFolders/blob/master/README.md" style="color: #FFD700;" target="_blank" rel="noopener">README</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://github.com/natanloterio/LiveFolders/blob/master/docs/livefoldersfs-vs-mcp.md" style="color: #FFD700;" target="_blank" rel="noopener">vs MCP</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://github.com/natanloterio/LiveFolders/tree/master/paper" style="color: #FFD700;" target="_blank" rel="noopener">Paper</a>
+            <br>
+            <a href="/privacy" style="color: #FFD700;">Privacy</a>
+            &nbsp;&middot;&nbsp;
+            <a href="/terms" style="color: #FFD700;">Terms</a>
+            &nbsp;&middot;&nbsp;
+            <a href="/security" style="color: #FFD700;">Security</a>
+          </td>
+          <td style="border: none; width: 33%; vertical-align: top; text-align: right; font-size: 0.85rem; color: #CCC;">
+            Made with &#x2665; and Rust &#x1f980;<br>
+            <span style="font-family: 'Courier New', monospace; color: #0F0;">[Visitors: 001337]</span>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('.code-box').forEach(function (box) {
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'position:relative;';
+        box.parentNode.insertBefore(wrapper, box);
+        wrapper.appendChild(box);
+
+        const btn = document.createElement('button');
+        btn.textContent = '[COPY]';
+        btn.style.cssText = [
+          'position:absolute', 'top:0.4rem', 'right:0.4rem',
+          'font-family:"Courier New",monospace', 'font-size:0.75rem',
+          'background:#222', 'color:#0F0', 'border:1px solid #0F0',
+          'padding:0.15rem 0.4rem', 'cursor:pointer', 'opacity:0',
+          'transition:opacity 0.15s'
+        ].join(';');
+
+        wrapper.addEventListener('mouseenter', function () { btn.style.opacity = '1'; });
+        wrapper.addEventListener('mouseleave', function () { btn.style.opacity = '0'; });
+
+        btn.addEventListener('click', function () {
+          navigator.clipboard.writeText(box.textContent).then(function () {
+            btn.textContent = '[COPIED!]';
+            setTimeout(function () { btn.textContent = '[COPY]'; }, 2000);
+          }).catch(function () {
+            btn.textContent = '[FAILED]';
+            setTimeout(function () { btn.textContent = '[COPY]'; }, 2000);
+          });
+        });
+
+        wrapper.appendChild(btn);
+      });
+
+      const path = window.location.pathname;
+      document.querySelectorAll('#sidebar a').forEach(function(link) {
+        const href = link.getAttribute('href');
+        if (href === path || (path === '/' && href === '/') || path.endsWith(href)) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
