@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { getDb } from '@/lib/db'
 import type { Tool } from '@/lib/db'
 import { BackButton } from '@/components/BackButton'
+import { CopyButton } from '@/components/CopyButton'
 
 export const revalidate = 60
 
@@ -42,6 +43,7 @@ export default async function ToolPage({
       <div className="box">
         <strong>Install:</strong><br />
         <code>{installCmd}</code>
+        <CopyButton text={installCmd} />
       </div>
 
       <table style={{ width: 'auto', marginBottom: 16 }}>
