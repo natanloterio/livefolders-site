@@ -177,6 +177,19 @@ section { padding: 2.5rem 0; }
   color: #FFD700;
 }
 
+/* === Page Header (inner pages) === */
+.page-header {
+  background: #000080;
+  color: #FFFFFF;
+  padding: 1.25rem 0;
+  border-bottom: 6px solid #111;
+}
+.page-header h1 {
+  font-size: 1.6rem;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
 /* === Mobile === */
 @media (max-width: 640px) {
   /* Sidebar — hide on mobile, reset body margin */
