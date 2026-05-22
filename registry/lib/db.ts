@@ -4,7 +4,7 @@ let _sql: ReturnType<typeof postgres> | null = null
 
 export function getDb() {
   if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL not set')
-  if (!_sql) _sql = postgres(process.env.DATABASE_URL, { max: 1 })
+  if (!_sql) _sql = postgres(process.env.DATABASE_URL, { max: 1, ssl: 'require', connect_timeout: 10 })
   return _sql
 }
 
