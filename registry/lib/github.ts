@@ -4,6 +4,7 @@ export type RepoMeta = {
   description: string | null
   repoUrl: string
   folderYaml: string
+  subdir?: string
 }
 
 export async function verifyRepoOwnership(
@@ -20,13 +21,15 @@ export async function verifyRepoOwnership(
 export async function fetchRepoMeta(
   token: string,
   owner: string,
-  repo: string
+  repo: string,
+  subdir?: string
 ): Promise<RepoMeta> {
+  const yamlPath = subdir ? `${subdir}/folder.yaml` : 'folder.yaml'
   const [repoRes, fileRes] = await Promise.all([
     fetch(`https://api.github.com/repos/${owner}/${repo}`, {
       headers: { Authorization: `Bearer ${token}`, 'User-Agent': 'livefolders-registry' },
     }),
-    fetch(`https://api.github.com/repos/${owner}/${repo}/contents/folder.yaml`, {
+    fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${yamlPath}`, {
       headers: { Authorization: `Bearer ${token}`, 'User-Agent': 'livefolders-registry' },
     }),
   ])
@@ -44,5 +47,6 @@ export async function fetchRepoMeta(
     description: repoData.description ?? null,
     repoUrl: repoData.html_url,
     folderYaml,
+    ...(subdir ? { subdir } : {}),
   }
 }

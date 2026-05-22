@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     )
   }
 
-  let body: { token?: string; repo?: string }
+  let body: { token?: string; repo?: string; subdir?: string }
   try {
     body = await req.json()
   } catch {
@@ -34,6 +34,13 @@ export async function POST(req: Request) {
   }
   const [, repoOwner, repoName] = slugMatch
 
+  const subdir = body.subdir ?? undefined
+  if (subdir !== undefined && !/^[a-zA-Z0-9_.-]+$/.test(subdir)) {
+    return NextResponse.json({ error: 'subdir must contain only alphanumeric characters, underscores, dots, or hyphens' }, { status: 400 })
+  }
+
+  const toolName = subdir ?? repoName
+
   let login: string
   try {
     const user = await verifyRepoOwnership(body.token, body.repo)
@@ -48,11 +55,14 @@ export async function POST(req: Request) {
 
   let meta
   try {
-    meta = await fetchRepoMeta(body.token, repoOwner, repoName)
+    meta = await fetchRepoMeta(body.token, repoOwner, repoName, subdir)
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : 'unknown'
     if (msg === 'repo_not_found') return NextResponse.json({ error: 'repository not found' }, { status: 404 })
-    if (msg === 'folder_yaml_missing') return NextResponse.json({ error: 'folder.yaml missing from repo root' }, { status: 422 })
+    if (msg === 'folder_yaml_missing') {
+      const path = subdir ? `${subdir}/folder.yaml` : 'folder.yaml'
+      return NextResponse.json({ error: `folder.yaml missing from ${path}` }, { status: 422 })
+    }
     return NextResponse.json({ error: 'GitHub API error' }, { status: 502 })
   }
 
@@ -64,16 +74,17 @@ export async function POST(req: Request) {
 
   const db = getDb()
   await db`
-    INSERT INTO tools (owner, name, description, repo_url, updated_at)
-    VALUES (${repoOwner}, ${repoName}, ${meta.description}, ${meta.repoUrl}, now())
+    INSERT INTO tools (owner, name, description, repo_url, subdir, updated_at)
+    VALUES (${repoOwner}, ${toolName}, ${meta.description}, ${meta.repoUrl}, ${subdir ?? null}, now())
     ON CONFLICT (owner, name) DO UPDATE
       SET description = EXCLUDED.description,
           repo_url    = EXCLUDED.repo_url,
+          subdir      = EXCLUDED.subdir,
           updated_at  = now()
   `
 
   return NextResponse.json({
     ok: true,
-    url: `${process.env.REGISTRY_BASE_URL}/${repoOwner}/${repoName}`,
+    url: `${process.env.REGISTRY_BASE_URL}/${repoOwner}/${toolName}`,
   })
 }
