@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Usage — LiveFolders</title>
+  <meta name="description" content="How to install, configure, and use LiveFolders with Claude Code, Cursor, and other AI agents.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗂️</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav id="sidebar">
+    <div class="sidebar-header">&#x1f5c2;&#xfe0f; LIVEFOLDERS</div>
+    <ul>
+      <li><a href="/">&#x25ba; Home</a></li>
+      <li><a href="/usage.html">&#x25ba; Usage</a></li>
+      <li><a href="/features.html">&#x25ba; Features</a></li>
+      <li><a href="/compare.html">&#x25ba; Compare</a></li>
+      <li><a href="/install.html">&#x25ba; Install</a></li>
+    </ul>
+    <div style="border-top: 2px solid #888; margin: 0.25rem 0;"></div>
+    <ul>
+      <li><a href="/findings.html">&#x25ba; Findings</a></li>
+      <li><a href="https://github.com/natanloterio/LiveFolders" target="_blank" rel="noopener">&#x25ba; GitHub</a></li>
+    </ul>
+  </nav>
+  <div style="background: #000080; color: #FFD700; padding: 0.3rem 0; overflow: hidden; white-space: nowrap; font-family: 'Courier New', monospace; font-size: 0.85rem;">
+    <marquee>🗂️ LiveFolders v0.11.0 &mdash; Now with sandbox isolation &mdash; Landlock (Linux) + sandbox-exec (macOS) &mdash; network blocked by default, strict mode supported &mdash; Apache 2.0 &mdash; Star us on GitHub! &#x2605;</marquee>
+  </div>
+  <header class="page-header">
+    <div class="container">
+      <h1>&#x1f5c2;&#xfe0f; Usage</h1>
+    </div>
+  </header>
+  <nav style="background: #C0C0C0; border-bottom: 3px solid #111; border-top: 3px solid #111; padding: 0.4rem 0;">
+    <div class="container" style="display: flex; gap: 1.5rem; font-size: 0.9rem; font-weight: bold; flex-wrap: wrap;">
+      <a href="/" style="color: #000080;">Home</a>
+      <a href="/install.html" style="color: #000080;">Install</a>
+      <a href="https://github.com/natanloterio/LiveFolders" style="color: #000080;" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/natanloterio/LiveFolders/blob/master/README.md" style="color: #000080;" target="_blank" rel="noopener">Docs</a>
+      <a href="/findings.html" style="color: #800000;">Findings</a>
+      <a href="https://natanloterio.substack.com" style="color: #000080;" target="_blank" rel="noopener">Blog</a>
+    </div>
+  </nav>
+
+  <!-- QUICK START -->
+  <section id="quickstart">
+    <div class="container">
+      <h2 class="section-header">Quick Start</h2>
+      <div class="code-box"># 1. Create a config file (offers to set up CLAUDE.md / AGENTS.md / Copilot automatically)
+livefolders init
+
+# 2. Install a tool from GitHub
+livefolders install github.com/natanloterio/LiveFolders/tree/master/examples/users
+
+# 3. Mount (runs in background, returns to prompt immediately)
+livefolders mount
+
+# 4. Use it
+cat .livefolders/tools/users/list      # fetches users from the API
+
+echo "hello world" &gt; .livefolders/tools/demo/shout
+cat .livefolders/tools/demo/shout      # &#x2192; HELLO WORLD
+
+# 5. Stop
+livefolders stop</div>
+    </div>
+  </section>
+  <hr>
+  <!-- GIVING TOOLS TO CLAUDE CODE -->
+  <section id="agent">
+    <div class="container">
+      <h2 class="section-header">Giving Tools to Your Agent</h2>
+      <p style="margin-bottom: 0.75rem;">
+        <strong><code>livefolders init</code> does this automatically</strong> &mdash; it detects your agent and writes the snippet to the right file:
+      </p>
+      <table style="margin-bottom: 1.25rem; width: auto;">
+        <thead><tr><th>Agent</th><th>File written</th></tr></thead>
+        <tbody>
+          <tr><td>Claude Code</td><td><code>CLAUDE.md</code></td></tr>
+          <tr><td>Cursor / Windsurf / Aider</td><td><code>AGENTS.md</code></td></tr>
+          <tr><td>GitHub Copilot</td><td><code>.github/copilot-instructions.md</code></td></tr>
+        </tbody>
+      </table>
+      <p style="margin-bottom: 0.5rem;">Or paste it manually into any agent&apos;s instruction file:</p>
+      <div class="code-box" style="margin-bottom: 1.25rem;">## Tools
+
+LiveFolders is mounted at `.livefolders/tools/`. Before using any tool:
+1. `cat .livefolders/tools/index.md` to see what&apos;s available
+2. `cat .livefolders/tools/&lt;name&gt;/how_to.md` to read usage instructions
+3. Write input with `echo "..." &gt; .livefolders/tools/&lt;name&gt;/&lt;endpoint&gt;`
+4. Read output with `cat .livefolders/tools/&lt;name&gt;/&lt;endpoint&gt;`</div>
+      <div class="pixel-box" style="background: #F0FFF0; margin-bottom: 1.25rem;">
+        <strong>&#x1f4d6; LLMs can also author new tools from inside the filesystem.</strong>
+        A virtual <code>create_tool.md</code> is mounted at the filesystem root &mdash; it contains
+        the complete <code>folder.yaml</code> reference: file types, input validation, secrets,
+        state, and pipelines. An LLM reads it and writes a working tool without ever leaving
+        the mounted filesystem:<br><br>
+        <code>cat .livefolders/create_tool.md</code>
+      </div>
+      <p style="margin-bottom: 0.75rem; font-weight: bold;">The agent then follows this sequence on its own:</p>
+      <table role="presentation" class="two-col" style="border: none;">
+        <tr>
+          <td style="border: none; width: 50%; vertical-align: top; padding-right: 1rem;">
+            <div class="pixel-box" style="margin-bottom: 0.75rem; background: #F0FFF0;">
+              <strong>1. Discover tools</strong><br>
+              <code>cat .livefolders/tools/index.md</code><br>
+              <span style="color: #555; font-size: 0.9rem;">&#x2192; weather &mdash; forecast for any city<br>&#x2192; users &mdash; fetch users from API</span>
+            </div>
+            <div class="pixel-box" style="margin-bottom: 0.75rem; background: #FFF8E7;">
+              <strong>2. Read usage instructions</strong><br>
+              <code>cat .livefolders/tools/weather/how_to.md</code><br>
+              <span style="color: #555; font-size: 0.9rem;">&#x2192; endpoint: forecast (write_invoke)<br>&#x2192; input: string, min_length: 1</span>
+            </div>
+            <div class="pixel-box" style="background: #F0F0FF;">
+              <strong>3. Invoke the tool</strong><br>
+              <code>echo "London" &gt; .livefolders/tools/weather/forecast</code><br>
+              <code>cat .livefolders/tools/weather/forecast</code><br>
+              <span style="color: #555; font-size: 0.9rem;">&#x2192; &#x2601;&#xfe0f; Overcast, 15&deg;C</span>
+            </div>
+          </td>
+          <td style="border: none; width: 50%; vertical-align: top; padding-left: 1rem;">
+            <div class="pixel-box" style="margin-bottom: 0.75rem; background: #FFF0F0;">
+              <strong>4. Handle errors</strong><br>
+              <code>echo "" &gt; .livefolders/tools/weather/forecast</code><br>
+              <span style="color: #800000; font-size: 0.9rem;">&#x2192; [ERROR:INVALID_INPUT] input too short: minimum 1 characters required</span>
+            </div>
+            <div class="pixel-box" style="background: #FFFFF0;">
+              <strong>5. Check timing &amp; diagnostics</strong><br>
+              <code>cat .livefolders/tools/weather/forecast.log</code><br>
+              <span style="color: #555; font-size: 0.9rem;">&#x2192; duration_ms: 342<br>&#x2192; exit: ok<br>&#x2192; stderr: (empty)</span>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </section>
+  <hr>
+  <!-- HOW IT WORKS -->
+  <section id="how">
+    <div class="container">
+      <h2 class="section-header">How It Works</h2>
+      <table role="presentation" class="two-col" style="border: none;">
+        <tr>
+          <td style="border: none; width: 45%; vertical-align: top; padding-right: 1.5rem;">
+            <div class="code-box" style="color: #FFFFFF; font-size: 0.85rem;">.livefolders/tools/
+&#x251c;&#x2500;&#x2500; index.md          &#x2190; all tools listed here
+&#x251c;&#x2500;&#x2500; demo/
+&#x2502;   &#x251c;&#x2500;&#x2500; how_to.md     &#x2190; LLM reads this first
+&#x2502;   &#x251c;&#x2500;&#x2500; schema.json   &#x2190; machine-readable schemas
+&#x2502;   &#x251c;&#x2500;&#x2500; shout         &#x2190; write text, read UPPERCASED
+&#x2502;   &#x251c;&#x2500;&#x2500; shout.log     &#x2190; last run: duration + stderr
+&#x2502;   &#x2514;&#x2500;&#x2500; status        &#x2190; read-only status
+&#x2514;&#x2500;&#x2500; users/
+    &#x251c;&#x2500;&#x2500; how_to.md
+    &#x251c;&#x2500;&#x2500; schema.json
+    &#x2514;&#x2500;&#x2500; list          &#x2190; reads from REST API</div>
+          </td>
+          <td style="border: none; width: 55%; vertical-align: top;">
+            <div class="pixel-box" style="margin-bottom: 0.75rem; background: #F0FFF0;">
+              <strong>1. Mount the filesystem</strong><br>
+              <code>livefolders mount</code> &mdash; runs in background, returns to prompt immediately.
+            </div>
+            <div class="pixel-box" style="margin-bottom: 0.75rem; background: #FFF8E7;">
+              <strong>2. LLM reads or writes a file</strong><br>
+              <code>cat tools/users/list</code> fetches users.<br>
+              <code>echo "London" &gt; tools/weather/forecast</code> sends a query.
+            </div>
+            <div class="pixel-box" style="background: #FFF0F0;">
+              <strong>3. Handler runs, result returns</strong><br>
+              Your shell command, Python script, or <code>curl</code> call executes.
+              Output is returned as file content.
+              <span style="color: #008080; font-weight: bold;">&#x2605; Changes hot-reload in ~1s</span>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </section>
+  <hr>
+
+  <footer style="background: #000080; color: #FFFFFF; padding: 2rem 0; border-top: 6px solid #111;">
+    <div class="container">
+      <table role="presentation" style="border: none; width: 100%;">
+        <tr>
+          <td style="border: none; width: 33%; vertical-align: top;">
+            <strong style="font-size: 1.1rem;">LiveFolders</strong><br>
+            <span style="font-size: 0.85rem; color: #CCC;">Apache 2.0 License</span>
+          </td>
+          <td style="border: none; width: 34%; vertical-align: top; text-align: center;">
+            <a href="https://github.com/natanloterio/LiveFolders" style="color: #FFD700;" target="_blank" rel="noopener">GitHub</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://github.com/natanloterio/LiveFolders/blob/master/README.md" style="color: #FFD700;" target="_blank" rel="noopener">README</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://github.com/natanloterio/LiveFolders/blob/master/docs/livefoldersfs-vs-mcp.md" style="color: #FFD700;" target="_blank" rel="noopener">vs MCP</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://github.com/natanloterio/LiveFolders/tree/master/paper" style="color: #FFD700;" target="_blank" rel="noopener">Paper</a>
+          </td>
+          <td style="border: none; width: 33%; vertical-align: top; text-align: right; font-size: 0.85rem; color: #CCC;">
+            Made with &#x2665; and Rust &#x1f980;<br>
+            <span style="font-family: 'Courier New', monospace; color: #0F0;">[Visitors: 001337]</span>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('.code-box').forEach(function (box) {
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'position:relative;';
+        box.parentNode.insertBefore(wrapper, box);
+        wrapper.appendChild(box);
+
+        const btn = document.createElement('button');
+        btn.textContent = '[COPY]';
+        btn.style.cssText = [
+          'position:absolute', 'top:0.4rem', 'right:0.4rem',
+          'font-family:"Courier New",monospace', 'font-size:0.75rem',
+          'background:#222', 'color:#0F0', 'border:1px solid #0F0',
+          'padding:0.15rem 0.4rem', 'cursor:pointer', 'opacity:0',
+          'transition:opacity 0.15s'
+        ].join(';');
+
+        wrapper.addEventListener('mouseenter', function () { btn.style.opacity = '1'; });
+        wrapper.addEventListener('mouseleave', function () { btn.style.opacity = '0'; });
+
+        btn.addEventListener('click', function () {
+          navigator.clipboard.writeText(box.textContent).then(function () {
+            btn.textContent = '[COPIED!]';
+            setTimeout(function () { btn.textContent = '[COPY]'; }, 2000);
+          }).catch(function () {
+            btn.textContent = '[FAILED]';
+            setTimeout(function () { btn.textContent = '[COPY]'; }, 2000);
+          });
+        });
+
+        wrapper.appendChild(btn);
+      });
+
+      // Sidebar active page highlight
+      const path = window.location.pathname;
+      document.querySelectorAll('#sidebar a').forEach(function(link) {
+        const href = link.getAttribute('href');
+        if (href === path || (path === '/' && href === '/') || path.endsWith(href)) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
