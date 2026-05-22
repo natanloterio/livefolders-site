@@ -72,6 +72,12 @@ export default async function ToolPage({
         <a href="https://github.com/natanloterio/LiveFolders">LiveFolders</a>
         {' · '}
         <a href="/">Registry home</a>
+        {' · '}
+        <a href="/privacy">Privacy</a>
+        {' · '}
+        <a href="/terms">Terms</a>
+        {' · '}
+        <a href="/security">Security</a>
       </p>
     </div>
   )

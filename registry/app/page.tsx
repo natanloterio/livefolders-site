@@ -88,6 +88,12 @@ export default async function Home({
         <a href="https://github.com/natanloterio/LiveFolders">LiveFolders on GitHub</a>
         {' · '}
         <a href="https://www.livefoldersfs.org">livefoldersfs.org</a>
+        {' · '}
+        <a href="/privacy">Privacy</a>
+        {' · '}
+        <a href="/terms">Terms</a>
+        {' · '}
+        <a href="/security">Security</a>
       </p>
     </div>
   )
