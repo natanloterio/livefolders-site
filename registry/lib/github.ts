@@ -41,10 +41,18 @@ export async function fetchRepoMeta(
   const fileData = await fileRes.json()
   const folderYaml = Buffer.from(fileData.content, 'base64').toString('utf8')
 
+  // Prefer the description declared inside folder.yaml over the GitHub repo description.
+  // This matters for monorepo tools where the repo description is generic.
+  let description: string | null = repoData.description ?? null
+  const yamlDescMatch = folderYaml.match(/^description:\s*(.+)$/m)
+  if (yamlDescMatch) {
+    description = yamlDescMatch[1].trim().replace(/^['"]|['"]$/g, '')
+  }
+
   return {
     owner,
     name: repo,
-    description: repoData.description ?? null,
+    description,
     repoUrl: repoData.html_url,
     folderYaml,
     ...(subdir ? { subdir } : {}),
