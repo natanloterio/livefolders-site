@@ -2,12 +2,6 @@ import { NextResponse } from 'next/server'
 import yaml from 'js-yaml'
 import { getDb } from '@/lib/db'
 import { verifyRepoOwnership, fetchRepoMeta } from '@/lib/github'
-import { publishLimiter, checkRateLimit } from '@/lib/ratelimit'
-
-function getIp(req: Request): string {
-  return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
-}
-
 export async function POST(req: Request) {
   let body: { token?: string; repo?: string; subdir?: string }
   try {
@@ -42,17 +36,6 @@ export async function POST(req: Request) {
 
   if (login.toLowerCase() !== repoOwner.toLowerCase()) {
     return NextResponse.json({ error: 'token does not belong to repo owner' }, { status: 403 })
-  }
-
-  // Rate-limit by IP, but only for users publishing to repos they don't own.
-  // Verified repo owners are exempt — they've already proven identity above.
-  const ip = getIp(req)
-  const rl = await checkRateLimit(publishLimiter, ip)
-  if (!rl.allowed) {
-    return NextResponse.json(
-      { error: 'rate limit exceeded (100 publishes/hour per IP)' },
-      { status: 429, headers: { 'X-RateLimit-Remaining': '0', 'X-RateLimit-Reset': String(rl.reset) } }
-    )
   }
 
   let meta
