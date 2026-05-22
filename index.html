@@ -205,7 +205,8 @@
       box.innerHTML = '<div style="padding:0.6rem 0.75rem;font-family:\'Courier New\',monospace;font-size:0.85rem;color:#555;">Searching&hellip;</div>';
       fetch('/api/registry/search?q=' + encodeURIComponent(q))
         .then(function(r){ return r.json(); })
-        .then(function(tools){
+        .then(function(data){
+          var tools = Array.isArray(data) ? data : (data.results || []);
           if (!tools || tools.length === 0) {
             box.innerHTML = '<div style="padding:0.6rem 0.75rem;font-family:\'Courier New\',monospace;font-size:0.85rem;color:#800000;">No tools found for &ldquo;' + q + '&rdquo;</div>';
             return;
