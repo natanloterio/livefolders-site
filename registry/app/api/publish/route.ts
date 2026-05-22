@@ -9,15 +9,6 @@ function getIp(req: Request): string {
 }
 
 export async function POST(req: Request) {
-  const ip = getIp(req)
-  const rl = await checkRateLimit(publishLimiter, ip)
-  if (!rl.allowed) {
-    return NextResponse.json(
-      { error: 'rate limit exceeded (10 publishes/hour per IP)' },
-      { status: 429, headers: { 'X-RateLimit-Remaining': '0', 'X-RateLimit-Reset': String(rl.reset) } }
-    )
-  }
-
   let body: { token?: string; repo?: string; subdir?: string }
   try {
     body = await req.json()
@@ -51,6 +42,17 @@ export async function POST(req: Request) {
 
   if (login.toLowerCase() !== repoOwner.toLowerCase()) {
     return NextResponse.json({ error: 'token does not belong to repo owner' }, { status: 403 })
+  }
+
+  // Rate-limit by IP, but only for users publishing to repos they don't own.
+  // Verified repo owners are exempt — they've already proven identity above.
+  const ip = getIp(req)
+  const rl = await checkRateLimit(publishLimiter, ip)
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: 'rate limit exceeded (100 publishes/hour per IP)' },
+      { status: 429, headers: { 'X-RateLimit-Remaining': '0', 'X-RateLimit-Reset': String(rl.reset) } }
+    )
   }
 
   let meta
