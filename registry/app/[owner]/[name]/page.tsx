@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { getDb } from '@/lib/db'
 import type { Tool } from '@/lib/db'
+import { BackButton } from '@/components/BackButton'
 
 export const revalidate = 60
 
@@ -33,7 +34,7 @@ export default async function ToolPage({
 
   return (
     <div className="container">
-      <p><a href="/">← Registry</a></p>
+      <p><BackButton />{' · '}<a href="/">Registry home</a></p>
 
       <h1 style={{ color: '#000080' }}>{owner}/{name}</h1>
       <p>{tool.description ?? 'No description.'}</p>
