@@ -40,9 +40,11 @@ export default async function ToolPage({
       <h1 style={{ color: '#000080' }}>{owner}/{name}</h1>
       <p>{tool.description ?? 'No description.'}</p>
 
-      <div className="box">
-        <strong>Install:</strong><br />
-        <code>{installCmd}</code>
+      <div className="box" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+        <div>
+          <strong>Install:</strong><br />
+          <code>{installCmd}</code>
+        </div>
         <CopyButton text={installCmd} />
       </div>
 
