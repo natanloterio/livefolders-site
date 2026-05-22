@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Features — LiveFolders</title>
+  <meta name="description" content="LiveFolders features: hot-reload, input validation, sandbox isolation, stateful tools, native tool schemas, and more.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗂️</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav id="sidebar">
+    <div class="sidebar-header">&#x1f5c2;&#xfe0f; LIVEFOLDERS</div>
+    <ul>
+      <li><a href="/">&#x25ba; Home</a></li>
+      <li><a href="/usage.html">&#x25ba; Usage</a></li>
+      <li><a href="/features.html">&#x25ba; Features</a></li>
+      <li><a href="/compare.html">&#x25ba; Compare</a></li>
+      <li><a href="/install.html">&#x25ba; Install</a></li>
+    </ul>
+    <div style="border-top: 2px solid #888; margin: 0.25rem 0;"></div>
+    <ul>
+      <li><a href="/findings.html">&#x25ba; Findings</a></li>
+      <li><a href="https://github.com/natanloterio/LiveFolders" target="_blank" rel="noopener">&#x25ba; GitHub</a></li>
+    </ul>
+  </nav>
+  <div style="background: #000080; color: #FFD700; padding: 0.3rem 0; overflow: hidden; white-space: nowrap; font-family: 'Courier New', monospace; font-size: 0.85rem;">
+    <marquee>🗂️ LiveFolders v0.11.0 &mdash; Now with sandbox isolation &mdash; Landlock (Linux) + sandbox-exec (macOS) &mdash; network blocked by default, strict mode supported &mdash; Apache 2.0 &mdash; Star us on GitHub! &#x2605;</marquee>
+  </div>
+  <header class="page-header">
+    <div class="container">
+      <h1>&#x26a1; Features</h1>
+    </div>
+  </header>
+  <nav style="background: #C0C0C0; border-bottom: 3px solid #111; border-top: 3px solid #111; padding: 0.4rem 0;">
+    <div class="container" style="display: flex; gap: 1.5rem; font-size: 0.9rem; font-weight: bold; flex-wrap: wrap;">
+      <a href="/" style="color: #000080;">Home</a>
+      <a href="/install.html" style="color: #000080;">Install</a>
+      <a href="https://github.com/natanloterio/LiveFolders" style="color: #000080;" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/natanloterio/LiveFolders/blob/master/README.md" style="color: #000080;" target="_blank" rel="noopener">Docs</a>
+      <a href="/findings.html" style="color: #800000;">Findings</a>
+      <a href="https://natanloterio.substack.com" style="color: #000080;" target="_blank" rel="noopener">Blog</a>
+    </div>
+  </nav>
+
+  <!-- WORKED EXAMPLE -->
+  <section id="comparison">
+    <div class="container">
+      <h2 class="section-header">10 Lines vs 18 Lines</h2>
+      <p style="margin-bottom: 1.25rem; font-size: 1.05rem;">
+        Same task: fetch users from a REST API and return markdown.
+        From the peer-reviewed paper, measured on live experiments:
+      </p>
+      <table role="presentation" class="two-col" style="border: none;">
+        <tr>
+          <td style="border: none; width: 50%; vertical-align: top; padding-right: 1rem;">
+            <div style="background: #F0FFF0; border: 3px solid #008000; padding: 0.5rem 0.75rem; margin-bottom: 0.5rem; font-weight: bold; font-family: 'Courier New', monospace;">
+              LiveFolders &mdash; folder.yaml (10 lines)
+            </div>
+            <div class="code-box" style="color: #FFFFFF; font-size: 0.8rem;">name: users
+description: List users from the mock API.
+files:
+  - name: list
+    type: read_invoke
+    handler: &gt;-
+      curl -s https://mockapi.io/users
+      | jq -r '"# Users\n",
+        (.[] | "## \(.name)\nID: \(.id)\n")'
+  - name: how_to.md
+    type: readonly</div>
+          </td>
+          <td style="border: none; width: 50%; vertical-align: top; padding-left: 1rem;">
+            <div style="background: #FFF0F0; border: 3px solid #800000; padding: 0.5rem 0.75rem; margin-bottom: 0.5rem; font-weight: bold; font-family: 'Courier New', monospace;">
+              MCP &mdash; server.py (18 lines)
+            </div>
+            <div class="code-box" style="color: #CCCCCC; font-size: 0.8rem;">import httpx
+from mcp.server.fastmcp import FastMCP
+mcp = FastMCP("users")
+
+@mcp.tool()
+def list_users() -&gt; str:
+    """Fetches all users."""
+    response = httpx.get(
+        "https://jsonplaceholder.typicode.com/users"
+    )
+    response.raise_for_status()
+    users = response.json()
+    lines = ["# Users", ""]
+    for u in users:
+        lines.append(f"## {u['name']}")
+        lines.append(f"ID: {u['id']}")
+        lines.append("")
+    return "\n".join(lines)
+
+if __name__ == "__main__":
+    mcp.run()</div>
+          </td>
+        </tr>
+      </table>
+      <div class="pixel-box" style="margin-top: 1rem; background: #FFFFF0;">
+        LiveFolders: no Python, no imports, no server lifecycle. The handler is a shell one-liner.
+        The gap grows with tool complexity &mdash; every MCP tool must navigate a server framework;
+        every LiveFolders tool is independently a shell command.
+      </div>
+    </div>
+  </section>
+  <hr>
+
+  <!-- KEY FEATURES -->
+  <section id="features">
+    <div class="container">
+      <h2 class="section-header">Key Features</h2>
+      <div class="feature-grid">
+        <div class="feature-card" style="background: #E0FFFF;">
+          <h3>&#x26a1; Hot-Reload</h3>
+          <p>Edit <code>folder.yaml</code> or a handler script &mdash; changes take effect in ~1 second.
+          No restart. No reconnect. The watcher picks it up automatically.</p>
+        </div>
+        <div class="feature-card" style="background: #FFFACD;">
+          <h3>&#x23f1; Handler Timeouts</h3>
+          <p>A hung tool is killed after a configurable timeout (default: 30s).
+          The endpoint returns an error string. The filesystem never freezes.</p>
+        </div>
+        <div class="feature-card" style="background: #FFE4E1;">
+          <h3>&#x1f511; Secret Management</h3>
+          <p>Declare required env vars in <code>folder.yaml</code>. Users are prompted
+          at install time. Secrets are stored in <code>secrets.env</code> and loaded on every mount.</p>
+        </div>
+        <div class="feature-card" style="background: #E6E6FA;">
+          <h3>&#x1fa7a; livefolders doctor</h3>
+          <p>Built-in diagnostic command. Checks FUSE installation, your config file,
+          and every installed tool&apos;s <code>folder.yaml</code>. Prints actionable fixes.</p>
+        </div>
+        <div class="feature-card" style="background: #F0FFF0;">
+          <h3>&#x2705; Input Validation</h3>
+          <p>Declare constraints on any endpoint: <code>min_length</code>, <code>max_length</code>,
+          <code>pattern</code> for strings; a <code>schema:</code> block with required fields and
+          property types for JSON. Invalid input is rejected before the handler runs.
+          Auto-documented in <code>how_to.md</code>.</p>
+        </div>
+        <div class="feature-card" style="background: #FFF5E6;">
+          <h3>&#x1f4cb; Structured Errors &amp; Logs</h3>
+          <p>All failures return <code>[ERROR:CODE] message</code> (5 parseable codes).
+          Each endpoint also exposes a companion <code>&lt;endpoint&gt;.log</code> file recording
+          <code>duration_ms</code> and <code>stderr</code> from the last run &mdash;
+          readable with <code>cat forecast.log</code>.</p>
+        </div>
+        <div class="feature-card" style="background: #E8F4FD;">
+          <h3>&#x1f4be; Stateful Tools</h3>
+          <p>Declare <code>state_file: /path/to/state.db</code> in <code>folder.yaml</code>.
+          The runtime holds an exclusive POSIX lock (<code>flock</code>) for the duration of each
+          call and injects <code>LIVEFOLDERS_STATE_FILE</code> &mdash; no handler-side locking needed.</p>
+        </div>
+        <div class="feature-card" style="background: #E8FFE8;">
+          <h3>&#x1f4ca; Native Tool Schemas</h3>
+          <p>A virtual <code>anthropic_tools.json</code> is synthesized at read time from <code>folder.yaml</code>,
+          exposing each endpoint as an Anthropic-format tool definition. Hidden endpoints are excluded automatically.
+          Inject into <code>tools=[]</code> directly &mdash; <strong>6&ndash;10% fewer tokens than MCP</strong> across an 8-task benchmark.</p>
+        </div>
+        <div class="feature-card" style="background: #FDF0FF;">
+          <h3>&#x1f517; Declarative Pipelines</h3>
+          <p>Add <code>pipe: [stage1, stage2]</code> to chain endpoints &mdash; stdout of each
+          stage becomes stdin of the next, in a single LLM write. Per-stage schema validation
+          runs before each handler. Any stage error stops the pipeline immediately.</p>
+        </div>
+        <div class="feature-card" style="background: #F5FFF5;">
+          <h3>&#x1f50d; Schema Discovery</h3>
+          <p>A virtual <code>schema.json</code> mirrors MCP&apos;s <code>list_tools</code> format:
+          tool names, descriptions, endpoint kinds, and full input constraints &mdash;
+          machine-readable by any MCP-aware client or script, alongside the human-readable
+          <code>how_to.md</code>.</p>
+        </div>
+        <div class="feature-card" style="background: #FFF0E0;">
+          <h3>&#x1f512; Sandbox Isolation</h3>
+          <p>Every handler runs in an OS-enforced sandbox. On Linux, Landlock LSM + seccomp
+          restricts filesystem paths and blocks outbound sockets. On macOS, <code>sandbox-exec</code>
+          applies equivalent SBPL rules. Network is denied by default &mdash; add <code>network: true</code>
+          in <code>folder.yaml</code> for tools that need it. Set <code>mode: strict</code> in
+          <code>livefolders.yaml</code> to refuse to mount if isolation cannot be applied.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <hr>
+
+  <footer style="background: #000080; color: #FFFFFF; padding: 2rem 0; border-top: 6px solid #111;">
+    <div class="container">
+      <table role="presentation" style="border: none; width: 100%;">
+        <tr>
+          <td style="border: none; width: 33%; vertical-align: top;">
+            <strong style="font-size: 1.1rem;">LiveFolders</strong><br>
+            <span style="font-size: 0.85rem; color: #CCC;">Apache 2.0 License</span>
+          </td>
+          <td style="border: none; width: 34%; vertical-align: top; text-align: center;">
+            <a href="https://github.com/natanloterio/LiveFolders" style="color: #FFD700;" target="_blank" rel="noopener">GitHub</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://github.com/natanloterio/LiveFolders/blob/master/README.md" style="color: #FFD700;" target="_blank" rel="noopener">README</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://github.com/natanloterio/LiveFolders/blob/master/docs/livefoldersfs-vs-mcp.md" style="color: #FFD700;" target="_blank" rel="noopener">vs MCP</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://github.com/natanloterio/LiveFolders/tree/master/paper" style="color: #FFD700;" target="_blank" rel="noopener">Paper</a>
+          </td>
+          <td style="border: none; width: 33%; vertical-align: top; text-align: right; font-size: 0.85rem; color: #CCC;">
+            Made with &#x2665; and Rust &#x1f980;<br>
+            <span style="font-family: 'Courier New', monospace; color: #0F0;">[Visitors: 001337]</span>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('.code-box').forEach(function (box) {
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'position:relative;';
+        box.parentNode.insertBefore(wrapper, box);
+        wrapper.appendChild(box);
+
+        const btn = document.createElement('button');
+        btn.textContent = '[COPY]';
+        btn.style.cssText = [
+          'position:absolute', 'top:0.4rem', 'right:0.4rem',
+          'font-family:"Courier New",monospace', 'font-size:0.75rem',
+          'background:#222', 'color:#0F0', 'border:1px solid #0F0',
+          'padding:0.15rem 0.4rem', 'cursor:pointer', 'opacity:0',
+          'transition:opacity 0.15s'
+        ].join(';');
+
+        wrapper.addEventListener('mouseenter', function () { btn.style.opacity = '1'; });
+        wrapper.addEventListener('mouseleave', function () { btn.style.opacity = '0'; });
+
+        btn.addEventListener('click', function () {
+          navigator.clipboard.writeText(box.textContent).then(function () {
+            btn.textContent = '[COPIED!]';
+            setTimeout(function () { btn.textContent = '[COPY]'; }, 2000);
+          }).catch(function () {
+            btn.textContent = '[FAILED]';
+            setTimeout(function () { btn.textContent = '[COPY]'; }, 2000);
+          });
+        });
+
+        wrapper.appendChild(btn);
+      });
+
+      // Sidebar active page highlight
+      const path = window.location.pathname;
+      document.querySelectorAll('#sidebar a').forEach(function(link) {
+        const href = link.getAttribute('href');
+        if (href === path || (path === '/' && href === '/') || path.endsWith(href)) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
