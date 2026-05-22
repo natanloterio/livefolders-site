@@ -44,6 +44,9 @@ export default async function Home({
       <h1 style={{ color: '#000080', borderBottom: '6px solid #000', paddingBottom: 8 }}>
         LiveFolders Registry
       </h1>
+      <p style={{ background: '#fffbe6', border: '2px solid #f0a500', padding: '8px 12px', fontWeight: 'bold' }}>
+        ⚠ This registry is experimental. APIs and tooling may change without notice.
+      </p>
       <p>Discover and install LiveFolders tools. <code>livefolders install owner/name</code></p>
 
       <form method="GET" style={{ margin: '16px 0' }}>
