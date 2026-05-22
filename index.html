@@ -214,7 +214,7 @@
           var html = '';
           tools.forEach(function(t) {
             var slug = t.owner + '/' + t.name;
-            html += '<a href="https://livefolders-registry.vercel.app/' + encodeURIComponent(t.owner) + '/' + encodeURIComponent(t.name) + '"'
+            html += '<a href="https://registry.livefoldersfs.org/' + encodeURIComponent(t.owner) + '/' + encodeURIComponent(t.name) + '"'
               + ' style="display:block;padding:0.55rem 0.75rem;border-bottom:2px solid #eee;text-decoration:none;color:#111;"'
               + ' onmouseover="this.style.background=\'#F0F0FF\'" onmouseout="this.style.background=\'\'"> '
               + '<span style="font-family:\'Courier New\',monospace;font-size:0.88rem;color:#000080;font-weight:bold;">' + slug + '</span>'
@@ -222,7 +222,7 @@
               + '<span style="font-size:0.78rem;color:#888;font-family:\'Courier New\',monospace;">' + (t.downloads || 0) + ' installs</span>'
               + '</a>';
           });
-          html += '<a href="https://livefolders-registry.vercel.app/?q=' + encodeURIComponent(q) + '"'
+          html += '<a href="https://registry.livefoldersfs.org/?q=' + encodeURIComponent(q) + '"'
             + ' style="display:block;padding:0.45rem 0.75rem;font-family:\'Courier New\',monospace;font-size:0.8rem;color:#000080;text-align:center;border-top:2px solid #111;background:#f5f5f5;">'
             + 'See all results on registry &rarr;</a>';
           box.innerHTML = html;
