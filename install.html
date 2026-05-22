@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Install — LiveFolders</title>
+  <meta name="description" content="Install LiveFolders — one curl command, FUSE prerequisite, quick start guide.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗂️</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav id="sidebar">
+    <div class="sidebar-header">&#x1f5c2;&#xfe0f; LIVEFOLDERS</div>
+    <ul>
+      <li><a href="/">&#x25ba; Home</a></li>
+      <li><a href="/usage.html">&#x25ba; Usage</a></li>
+      <li><a href="/features.html">&#x25ba; Features</a></li>
+      <li><a href="/compare.html">&#x25ba; Compare</a></li>
+      <li><a href="/install.html">&#x25ba; Install</a></li>
+    </ul>
+    <div style="border-top: 2px solid #888; margin: 0.25rem 0;"></div>
+    <ul>
+      <li><a href="/findings.html">&#x25ba; Findings</a></li>
+      <li><a href="https://github.com/natanloterio/LiveFolders" target="_blank" rel="noopener">&#x25ba; GitHub</a></li>
+    </ul>
+  </nav>
+  <div style="background: #000080; color: #FFD700; padding: 0.3rem 0; overflow: hidden; white-space: nowrap; font-family: 'Courier New', monospace; font-size: 0.85rem;">
+    <marquee>🗂️ LiveFolders v0.11.0 &mdash; Now with sandbox isolation &mdash; Landlock (Linux) + sandbox-exec (macOS) &mdash; network blocked by default, strict mode supported &mdash; Apache 2.0 &mdash; Star us on GitHub! &#x2605;</marquee>
+  </div>
+  <header class="page-header">
+    <div class="container">
+      <h1>&#x25bc; Install</h1>
+    </div>
+  </header>
+  <nav style="background: #C0C0C0; border-bottom: 3px solid #111; border-top: 3px solid #111; padding: 0.4rem 0;">
+    <div class="container" style="display: flex; gap: 1.5rem; font-size: 0.9rem; font-weight: bold; flex-wrap: wrap;">
+      <a href="/" style="color: #000080;">Home</a>
+      <a href="/install.html" style="color: #000080;">Install</a>
+      <a href="https://github.com/natanloterio/LiveFolders" style="color: #000080;" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/natanloterio/LiveFolders/blob/master/README.md" style="color: #000080;" target="_blank" rel="noopener">Docs</a>
+      <a href="/findings.html" style="color: #800000;">Findings</a>
+      <a href="https://natanloterio.substack.com" style="color: #000080;" target="_blank" rel="noopener">Blog</a>
+    </div>
+  </nav>
+
+  <section id="install">
+    <div class="container">
+      <h2 class="section-header">Get Started</h2>
+
+      <p style="margin-bottom: 0.75rem; font-weight: bold;">1. Install LiveFolders:</p>
+      <div class="code-box" style="margin-bottom: 1.5rem;">curl -fsSL https://raw.githubusercontent.com/natanloterio/LiveFolders/master/install.sh | bash</div>
+
+      <p style="margin-bottom: 0.5rem; font-weight: bold;">Prerequisites:</p>
+      <table style="margin-bottom: 1.5rem; width: auto;">
+        <thead><tr><th>Platform</th><th>Requirement</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Linux</td>
+            <td><code>sudo apt-get install fuse3</code></td>
+          </tr>
+          <tr>
+            <td>macOS</td>
+            <td><a href="https://osxfuse.github.io" target="_blank" rel="noopener">macFUSE</a> &mdash; install the .pkg from osxfuse.github.io</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p style="margin-bottom: 0.75rem; font-weight: bold;">2. Quick start:</p>
+      <div class="code-box" style="margin-bottom: 1.5rem;"># Create config
+livefolders init
+
+# Install an example tool
+livefolders install github.com/natanloterio/LiveFolders/tree/master/examples/users
+
+# Mount (runs in background)
+livefolders mount
+
+# Use it
+cat .livefolders/tools/users/list
+
+# Stop
+livefolders stop</div>
+
+      <details style="border: 3px solid #111; padding: 0.75rem; background: #F5F5F5;">
+        <summary style="cursor: pointer; font-weight: bold; font-family: 'Courier New', monospace;">
+          Manual install / from source
+        </summary>
+        <div class="code-box" style="margin-top: 0.75rem;"># Linux x86_64
+curl -L https://github.com/natanloterio/LiveFolders/releases/latest/download/livefolders-linux-x86_64 -o livefolders
+chmod +x livefolders &amp;&amp; sudo mv livefolders /usr/local/bin/
+
+# From source (requires Rust)
+cargo install --git https://github.com/natanloterio/LiveFolders</div>
+      </details>
+    </div>
+  </section>
+  <hr>
+
+  <footer style="background: #000080; color: #FFFFFF; padding: 2rem 0; border-top: 6px solid #111;">
+    <div class="container">
+      <table role="presentation" style="border: none; width: 100%;">
+        <tr>
+          <td style="border: none; width: 33%; vertical-align: top;">
+            <strong style="font-size: 1.1rem;">LiveFolders</strong><br>
+            <span style="font-size: 0.85rem; color: #CCC;">Apache 2.0 License</span>
+          </td>
+          <td style="border: none; width: 34%; vertical-align: top; text-align: center;">
+            <a href="https://github.com/natanloterio/LiveFolders" style="color: #FFD700;" target="_blank" rel="noopener">GitHub</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://github.com/natanloterio/LiveFolders/blob/master/README.md" style="color: #FFD700;" target="_blank" rel="noopener">README</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://github.com/natanloterio/LiveFolders/blob/master/docs/livefoldersfs-vs-mcp.md" style="color: #FFD700;" target="_blank" rel="noopener">vs MCP</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://github.com/natanloterio/LiveFolders/tree/master/paper" style="color: #FFD700;" target="_blank" rel="noopener">Paper</a>
+          </td>
+          <td style="border: none; width: 33%; vertical-align: top; text-align: right; font-size: 0.85rem; color: #CCC;">
+            Made with &#x2665; and Rust &#x1f980;<br>
+            <span style="font-family: 'Courier New', monospace; color: #0F0;">[Visitors: 001337]</span>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('.code-box').forEach(function (box) {
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'position:relative;';
+        box.parentNode.insertBefore(wrapper, box);
+        wrapper.appendChild(box);
+
+        const btn = document.createElement('button');
+        btn.textContent = '[COPY]';
+        btn.style.cssText = [
+          'position:absolute', 'top:0.4rem', 'right:0.4rem',
+          'font-family:"Courier New",monospace', 'font-size:0.75rem',
+          'background:#222', 'color:#0F0', 'border:1px solid #0F0',
+          'padding:0.15rem 0.4rem', 'cursor:pointer', 'opacity:0',
+          'transition:opacity 0.15s'
+        ].join(';');
+
+        wrapper.addEventListener('mouseenter', function () { btn.style.opacity = '1'; });
+        wrapper.addEventListener('mouseleave', function () { btn.style.opacity = '0'; });
+
+        btn.addEventListener('click', function () {
+          navigator.clipboard.writeText(box.textContent).then(function () {
+            btn.textContent = '[COPIED!]';
+            setTimeout(function () { btn.textContent = '[COPY]'; }, 2000);
+          }).catch(function () {
+            btn.textContent = '[FAILED]';
+            setTimeout(function () { btn.textContent = '[COPY]'; }, 2000);
+          });
+        });
+
+        wrapper.appendChild(btn);
+      });
+
+      // Sidebar active page highlight
+      const path = window.location.pathname;
+      document.querySelectorAll('#sidebar a').forEach(function(link) {
+        const href = link.getAttribute('href');
+        if (href === path || (path === '/' && href === '/') || path.endsWith(href)) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
