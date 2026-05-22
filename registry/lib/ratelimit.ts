@@ -9,8 +9,8 @@ function makeLimiter(prefix: string, max: number, window: `${number} ${'s' | 'm'
   })
 }
 
-// publish: 10 per hour per IP
-export const publishLimiter = makeLimiter('rl:publish', 10, '1 h')
+// publish: 100 per hour per IP
+export const publishLimiter = makeLimiter('rl:publish', 100, '1 h')
 
 // search: 60 per minute per IP
 export const searchLimiter = makeLimiter('rl:search', 60, '1 m')
