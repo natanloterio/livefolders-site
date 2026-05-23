@@ -27,7 +27,7 @@ cat  .livefolders/tools/weather/report
 # → fetch → translate → format, all in one round trip
 ```
 
-- Version: 0.11.0
+- Version: 0.22.0
 - License: Apache 2.0
 - GitHub: https://github.com/natanloterio/LiveFolders
 - Website: https://www.livefoldersfs.org
@@ -69,14 +69,15 @@ files:
 ## Key Features
 
 - **Hot-Reload**: Edit `folder.yaml` or a handler script — changes take effect in ~1 second, no restart
-- **Sandbox Isolation** (v0.11.0): Landlock LSM + seccomp (Linux), sandbox-exec (macOS); network blocked by default; `network: true` to opt in; `mode: strict` refuses to mount if isolation unavailable
+- **Sandbox Isolation**: Landlock LSM + seccomp (Linux), sandbox-exec (macOS); network blocked by default; `network: true` to opt in; `mode: strict` refuses to mount if isolation unavailable
+- **Concurrent Shell Sessions** (v0.22.0): Invocation buffers scoped by `(inode, session-id)` — two pipelines from different shells no longer clobber each other's results. Handlers dispatched async off the FUSE thread so parallel pipelines actually run in parallel. Abandoned slots reaped after 15-minute idle TTL.
 - **Input Validation**: Per-endpoint `min_length`, `max_length`, `pattern`, JSON `schema:` block — validated before handler runs, auto-documented in `how_to.md`
 - **Structured Errors**: All failures return `[ERROR:CODE] message` (5 parseable codes)
 - **Logs**: Each endpoint exposes `<endpoint>.log` with `duration_ms` and `stderr` from last run
 - **Stateful Tools**: Declare `state_file:` in `folder.yaml`; runtime holds exclusive `flock` for each call, injects `LIVEFOLDERS_STATE_FILE`
 - **Declarative Pipelines**: `pipe: [stage1, stage2]` chains endpoints — stdout→stdin in one LLM write, per-stage validation
 - **Schema Discovery**: `schema.json` mirrors MCP's `list_tools` format — machine-readable by MCP-aware clients
-- **Handler Timeouts**: Hung tools killed after configurable timeout (default 30s), returns error string
+- **Handler Timeouts & SIGKILL Escalation**: Hung tools receive SIGTERM at configurable timeout (default 30s), then SIGKILL after 1s grace if still running; returns error string
 - **Secret Management**: Declare required env vars in `folder.yaml`; users prompted at install; stored in `secrets.env`
 
 ## Agent Auto-Setup

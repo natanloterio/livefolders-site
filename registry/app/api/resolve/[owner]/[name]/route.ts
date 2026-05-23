@@ -8,7 +8,7 @@ function getIp(req: Request): string {
 
 async function getLatestTag(owner: string, repo: string, prefix?: string): Promise<string | null> {
   const res = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/tags`,
+    `https://api.github.com/repos/${owner}/${repo}/tags?per_page=100`,
     { headers: { 'User-Agent': 'livefolders-registry' } }
   )
   if (!res.ok) return null

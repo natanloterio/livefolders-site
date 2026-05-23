@@ -26,7 +26,7 @@
     </ul>
   </nav>
   <div style="background: #000080; color: #FFD700; padding: 0.3rem 0; overflow: hidden; white-space: nowrap; font-family: 'Courier New', monospace; font-size: 0.85rem;">
-    <marquee>🗂️ LiveFolders v0.11.0 &mdash; Chain tools into one call &mdash; 1 round trip per workflow, not N &mdash; declare a pipeline in folder.yaml, agent fires it with one echo/cat &mdash; Apache 2.0 &mdash; Star us on GitHub! &#x2605;</marquee>
+    <marquee>🗂️ LiveFolders v0.22.0 &mdash; Now with concurrent shell session isolation &mdash; per-session invocation slots, async dispatch, SIGKILL escalation &mdash; Landlock (Linux) + sandbox-exec (macOS) &mdash; Apache 2.0 &mdash; Star us on GitHub! &#x2605;</marquee>
   </div>
   <header class="page-header">
     <div class="container">
@@ -125,9 +125,18 @@ if __name__ == "__main__":
           No restart. No reconnect. The watcher picks it up automatically.</p>
         </div>
         <div class="feature-card" style="background: #FFFACD;">
-          <h3>&#x23f1; Handler Timeouts</h3>
-          <p>A hung tool is killed after a configurable timeout (default: 30s).
+          <h3>&#x23f1; Handler Timeouts &amp; SIGKILL Escalation</h3>
+          <p>A hung tool receives SIGTERM at the configured timeout (default: 30s),
+          then SIGKILL after a 1-second grace period if it doesn&apos;t exit.
           The endpoint returns an error string. The filesystem never freezes.</p>
+        </div>
+        <div class="feature-card" style="background: #E0F7FA;">
+          <h3>&#x1f501; Concurrent Shell Sessions</h3>
+          <p>Two shell pipelines on the same endpoint no longer clobber each other&apos;s results.
+          Invocation buffers are scoped by <code>(inode, session-id)</code> &mdash; <code>echo</code>
+          and <code>cat</code> from the same shell share a sid, so results are always routed to
+          the right caller. Handlers are dispatched asynchronously off the FUSE thread, so parallel
+          pipelines actually run in parallel. Abandoned slots are reaped after a 15-minute idle TTL.</p>
         </div>
         <div class="feature-card" style="background: #FFE4E1;">
           <h3>&#x1f511; Secret Management</h3>
