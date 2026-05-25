@@ -3,21 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LiveFolders — Expose tools to LLMs as plain files</title>
-  <meta name="description" content="A virtual filesystem that exposes any tool to an LLM via cat and echo. No JSON. No SDK. No protocol. 10 lines of YAML vs 18 lines of Python.">
+  <title>LiveFolders — Chain tools into one call</title>
+  <meta name="description" content="Declare a pipeline in folder.yaml — the agent triggers the whole chain with a single echo/cat. 1 round trip per workflow, not N. No per-step JSON, no per-step model turn.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗂️</text></svg>">
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://www.livefoldersfs.org">
-  <meta property="og:title" content="🗂️ LiveFolders — Expose tools to LLMs as plain files">
-  <meta property="og:description" content="A virtual filesystem alternative to MCP. Expose any tool to an LLM via cat and echo — no JSON, no SDK, no protocol. 10 lines of YAML vs 18 lines of Python.">
+  <meta property="og:title" content="🗂️ LiveFolders — Chain tools into one call">
+  <meta property="og:description" content="Declare a pipeline in folder.yaml — the agent triggers the whole chain with a single echo/cat. 1 round trip per workflow, not N. A virtual filesystem alternative to MCP.">
   <meta property="og:site_name" content="LiveFolders">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="🗂️ LiveFolders — Expose tools to LLMs as plain files">
-  <meta name="twitter:description" content="A virtual filesystem alternative to MCP. Expose any tool to an LLM via cat and echo — no JSON, no SDK, no protocol.">
+  <meta name="twitter:title" content="🗂️ LiveFolders — Chain tools into one call">
+  <meta name="twitter:description" content="Declare a pipeline in folder.yaml — the agent triggers the whole chain with a single echo/cat. 1 round trip per workflow, not N.">
 
   <link rel="stylesheet" href="style.css">
 </head>
@@ -39,7 +39,7 @@
     </ul>
   </nav>
   <div style="background: #000080; color: #FFD700; padding: 0.3rem 0; overflow: hidden; white-space: nowrap; font-family: 'Courier New', monospace; font-size: 0.85rem;">
-    <marquee>🗂️ LiveFolders v0.11.0 &mdash; Now with sandbox isolation &mdash; Landlock (Linux) + sandbox-exec (macOS) &mdash; network blocked by default, strict mode supported &mdash; Apache 2.0 &mdash; Star us on GitHub! &#x2605;</marquee>
+    <marquee>🗂️ LiveFolders v0.11.0 &mdash; Chain tools into one call &mdash; 1 round trip per workflow, not N &mdash; declare a pipeline in folder.yaml, agent fires it with one echo/cat &mdash; Apache 2.0 &mdash; Star us on GitHub! &#x2605;</marquee>
   </div>
 
   <!-- HERO -->
@@ -48,13 +48,16 @@
       <h1 style="font-size: 3rem; color: #000080; margin-bottom: 0.5rem; letter-spacing: -1px;">
         🗂️ LiveFolders
       </h1>
-      <p style="font-size: 1.25rem; max-width: 600px; margin: 0 auto 0.5rem; font-style: italic;">
-        Expose any tool to an LLM as plain files.<br>
-        No JSON. No SDK. Just <code>cat</code> and <code>echo</code>
+      <p style="font-size: 1.4rem; max-width: 640px; margin: 0 auto 0.5rem; font-weight: bold; color: #111;">
+        Chain tools into one call.
+      </p>
+      <p style="font-size: 1.05rem; max-width: 640px; margin: 0 auto 0.5rem; font-style: italic;">
+        Declare a pipeline in <code>folder.yaml</code> &mdash; the agent triggers the whole chain
+        with a single <code>echo</code> / <code>cat</code>. No per-step JSON, no per-step model turn.
       </p>
       <p style="font-size: 0.9rem; color: #555; margin-bottom: 1.75rem;">
         A virtual filesystem alternative to MCP &mdash; built in Rust, zero dependencies for tool authors.<br>
-        <strong>10 lines of YAML vs 18 lines of Python</strong> for an equivalent REST tool.
+        <strong>1 round trip per workflow, not N.</strong>
       </p>
       <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.75rem;">
         <a href="https://github.com/natanloterio/LiveFolders" class="btn btn-gold" target="_blank" rel="noopener">
@@ -112,6 +115,79 @@
     }
   </script>
 
+  <!-- ONE CALL, WHOLE PIPELINE -->
+  <section id="pipeline">
+    <div class="container">
+      <h2 class="section-header">One Call. Whole Pipeline.</h2>
+      <p style="margin-bottom: 1.25rem; font-size: 1.05rem;">
+        Declare a chain of steps in <code>folder.yaml</code>. The agent writes once,
+        reads once &mdash; the kernel runs the pipeline. A 5-step chain becomes
+        <strong>one model turn</strong>, not five.
+      </p>
+      <table role="presentation" class="two-col" style="border: none;">
+        <tr>
+          <td style="border: none; width: 50%; vertical-align: top; padding-right: 1rem;">
+            <div style="background: #F0FFF0; border: 3px solid #008000; padding: 0.5rem 0.75rem; margin-bottom: 0.5rem; font-weight: bold; font-family: 'Courier New', monospace;">
+              folder.yaml &mdash; declare the chain
+            </div>
+            <div class="code-box" style="font-size: 0.82rem;"># tools/weather/folder.yaml
+files:
+  - name: report
+    type: write_invoke
+    pipe: [fetch_data, translate, format]
+    # 3 steps, 1 endpoint</div>
+          </td>
+          <td style="border: none; width: 50%; vertical-align: top; padding-left: 1rem;">
+            <div style="background: #F0F0FF; border: 3px solid #000080; padding: 0.5rem 0.75rem; margin-bottom: 0.5rem; font-weight: bold; font-family: 'Courier New', monospace;">
+              agent &mdash; fire the whole chain
+            </div>
+            <div class="code-box" style="font-size: 0.82rem;">echo "London" &gt; \
+  .livefolders/tools/weather/report
+cat .livefolders/tools/weather/report
+# &rarr; fetch &rarr; translate &rarr; format,
+#   all in one round trip</div>
+          </td>
+        </tr>
+      </table>
+      <div class="pixel-box" style="border-color: #000080; background: #F0F0FF; margin-top: 1rem;">
+        <strong>&#x2139;&#xfe0f; The write call blocks until the pipeline finishes</strong> &mdash;
+        by the time <code>cat</code> runs, the final result is ready. No polling, no glue code,
+        no stale data.
+      </div>
+    </div>
+  </section>
+  <hr>
+
+  <!-- WHY A FOLDER BEATS JSON TOOL-CALLING -->
+  <section id="why">
+    <div class="container">
+      <h2 class="section-header">Why a Folder Beats JSON Tool-Calling</h2>
+      <div class="feature-grid">
+        <div class="feature-card" style="background: #FDF0FF;">
+          <h3>&#x1f504; 1 round trip per workflow, not N</h3>
+          <p>A 5-step chain is one model turn, not five. The agent writes once and reads once &mdash;
+          the kernel runs the pipeline.</p>
+        </div>
+        <div class="feature-card" style="background: #E0FFFF;">
+          <h3>&#x1f9f9; No schema chatter between stages</h3>
+          <p>Stages hand bytes to each other on stdin/stdout &mdash; no re-serializing through the model,
+          no per-call validation overhead.</p>
+        </div>
+        <div class="feature-card" style="background: #FFFACD;">
+          <h3>&#x1f50e; Lazy discovery</h3>
+          <p><code>ls</code>, <code>cat index.md</code>, <code>cat how_to.md</code>. Tool docs load only
+          when the agent needs them, instead of every schema squatting in the context window.</p>
+        </div>
+        <div class="feature-card" style="background: #E8FFE8;">
+          <h3>&#x1f41a; Shell composition for free</h3>
+          <p>Agents already know <code>|</code>, <code>xargs</code>, <code>tee</code>. Composing tools
+          doesn&apos;t require a new protocol.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <hr>
+
   <!-- WHAT IS IT -->
   <section id="what">
     <div class="container">
@@ -152,11 +228,6 @@
 # &#x2192; ID: 1
 # &#x2192; Created: 2024-01-15
 # &#x2192; Avatar: https://cdn.example.com/avatars/1.jpg</div>
-      <div class="pixel-box" style="border-color: #000080; background: #F0F0FF;">
-        <strong>&#x2139;&#xfe0f; How the blocking works:</strong>
-        The <em>write</em> call blocks until the tool finishes &mdash; by the time
-        <code>cat</code> runs, the result is ready. The filesystem never returns stale data.
-      </div>
     </div>
   </section>
   <hr>

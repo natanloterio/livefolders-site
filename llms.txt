@@ -1,8 +1,31 @@
 # LiveFolders
 
-> A virtual filesystem that exposes any tool to an LLM as plain files. No JSON. No SDK. Just `cat` and `echo`. Built in Rust, zero dependencies for tool authors.
+> Chain tools into one call. Declare a pipeline in `folder.yaml` — the agent triggers the whole chain with a single `echo` / `cat`. No per-step JSON, no per-step model turn. 1 round trip per workflow, not N. Built in Rust, zero dependencies for tool authors.
 
-LiveFolders mounts a virtual filesystem on your machine (via FUSE). Every installed tool appears as a directory of plain files. An LLM reads a file to call the tool — no JSON protocol, no SDK, no special client. Any agent that can run `cat` or `echo` can use it.
+LiveFolders mounts a virtual filesystem on your machine (via FUSE). Every installed tool appears as a directory of plain files. An LLM reads a file to call the tool — no JSON protocol, no SDK, no special client. Any agent that can run `cat` or `echo` can use it. Multi-step workflows are declared as pipelines in `folder.yaml` and run as a single round trip.
+
+## Why a folder beats JSON tool-calling
+
+- **1 round trip per workflow, not N.** A 5-step chain is one model turn, not five. The agent writes once and reads once; the kernel runs the pipeline.
+- **No schema chatter between stages.** Stages hand bytes to each other on stdin/stdout — no re-serializing through the model, no per-call validation overhead.
+- **Lazy discovery.** `ls`, `cat index.md`, `cat how_to.md`. Tool docs load only when the agent needs them, instead of every schema squatting in the context window.
+- **Shell composition for free.** Agents already know `|`, `xargs`, `tee`. Composing tools doesn't require a new protocol.
+
+## Pipelines in one folder.yaml
+
+```yaml
+# tools/weather/folder.yaml
+files:
+  - name: report
+    type: write_invoke
+    pipe: [fetch_data, translate, format]   # 3 steps, 1 endpoint
+```
+
+```bash
+echo "London" > .livefolders/tools/weather/report
+cat  .livefolders/tools/weather/report
+# → fetch → translate → format, all in one round trip
+```
 
 - Version: 0.11.0
 - License: Apache 2.0

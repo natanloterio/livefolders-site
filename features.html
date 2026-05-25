@@ -26,7 +26,7 @@
     </ul>
   </nav>
   <div style="background: #000080; color: #FFD700; padding: 0.3rem 0; overflow: hidden; white-space: nowrap; font-family: 'Courier New', monospace; font-size: 0.85rem;">
-    <marquee>🗂️ LiveFolders v0.11.0 &mdash; Now with sandbox isolation &mdash; Landlock (Linux) + sandbox-exec (macOS) &mdash; network blocked by default, strict mode supported &mdash; Apache 2.0 &mdash; Star us on GitHub! &#x2605;</marquee>
+    <marquee>🗂️ LiveFolders v0.11.0 &mdash; Chain tools into one call &mdash; 1 round trip per workflow, not N &mdash; declare a pipeline in folder.yaml, agent fires it with one echo/cat &mdash; Apache 2.0 &mdash; Star us on GitHub! &#x2605;</marquee>
   </div>
   <header class="page-header">
     <div class="container">
@@ -112,6 +112,13 @@ if __name__ == "__main__":
     <div class="container">
       <h2 class="section-header">Key Features</h2>
       <div class="feature-grid">
+        <div class="feature-card" style="background: #FDF0FF; border-color: #800080;">
+          <h3>&#x1f517; Declarative Pipelines &mdash; chain tools into one call</h3>
+          <p>Add <code>pipe: [stage1, stage2, stage3]</code> to chain endpoints &mdash; stdout of each
+          stage becomes stdin of the next, in a <strong>single LLM write</strong>. A 5-step chain is
+          <strong>one model turn, not five</strong>. Per-stage schema validation runs before each handler.
+          Any stage error stops the pipeline immediately.</p>
+        </div>
         <div class="feature-card" style="background: #E0FFFF;">
           <h3>&#x26a1; Hot-Reload</h3>
           <p>Edit <code>folder.yaml</code> or a handler script &mdash; changes take effect in ~1 second.
@@ -157,12 +164,6 @@ if __name__ == "__main__":
           <p>A virtual <code>anthropic_tools.json</code> is synthesized at read time from <code>folder.yaml</code>,
           exposing each endpoint as an Anthropic-format tool definition. Hidden endpoints are excluded automatically.
           Inject into <code>tools=[]</code> directly &mdash; <strong>6&ndash;10% fewer tokens than MCP</strong> across an 8-task benchmark.</p>
-        </div>
-        <div class="feature-card" style="background: #FDF0FF;">
-          <h3>&#x1f517; Declarative Pipelines</h3>
-          <p>Add <code>pipe: [stage1, stage2]</code> to chain endpoints &mdash; stdout of each
-          stage becomes stdin of the next, in a single LLM write. Per-stage schema validation
-          runs before each handler. Any stage error stops the pipeline immediately.</p>
         </div>
         <div class="feature-card" style="background: #F5FFF5;">
           <h3>&#x1f50d; Schema Discovery</h3>
