@@ -1,16 +1,10 @@
 import { notFound } from 'next/navigation'
-import { getDb } from '@/lib/db'
-import type { Tool } from '@/lib/db'
+import { findTool } from '@/lib/store'
+import type { Tool } from '@/lib/store'
 import { BackButton } from '@/components/BackButton'
 import { CopyButton } from '@/components/CopyButton'
 
 export const revalidate = 60
-
-async function getTool(owner: string, name: string): Promise<Tool | null> {
-  const db = getDb()
-  const rows = await db`SELECT * FROM tools WHERE owner = ${owner} AND name = ${name}` as unknown as Tool[]
-  return rows[0] ?? null
-}
 
 async function getVersions(owner: string, name: string): Promise<string[]> {
   const res = await fetch(`https://api.github.com/repos/${owner}/${name}/tags`, {
@@ -28,7 +22,7 @@ export default async function ToolPage({
   params: Promise<{ owner: string; name: string }>
 }) {
   const { owner, name } = await params
-  const [tool, versions] = await Promise.all([getTool(owner, name), getVersions(owner, name)])
+  const [tool, versions] = await Promise.all([findTool(owner, name), getVersions(owner, name)])
   if (!tool) notFound()
 
   const installCmd = `livefolders install ${owner}/${name}`

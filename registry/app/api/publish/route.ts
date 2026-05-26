@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import yaml from 'js-yaml'
-import { getDb } from '@/lib/db'
+import { upsertTool } from '@/lib/store'
 import { verifyRepoOwnership, fetchRepoMeta } from '@/lib/github'
+
 export async function POST(req: Request) {
   let body: { token?: string; repo?: string; subdir?: string }
   try {
@@ -45,8 +46,8 @@ export async function POST(req: Request) {
     const msg = e instanceof Error ? e.message : 'unknown'
     if (msg === 'repo_not_found') return NextResponse.json({ error: 'repository not found' }, { status: 404 })
     if (msg === 'folder_yaml_missing') {
-      const path = subdir ? `${subdir}/folder.yaml` : 'folder.yaml'
-      return NextResponse.json({ error: `folder.yaml missing from ${path}` }, { status: 422 })
+      const filePath = subdir ? `${subdir}/folder.yaml` : 'folder.yaml'
+      return NextResponse.json({ error: `folder.yaml missing from ${filePath}` }, { status: 422 })
     }
     return NextResponse.json({ error: 'GitHub API error' }, { status: 502 })
   }
@@ -57,16 +58,22 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'folder.yaml is not valid YAML' }, { status: 422 })
   }
 
-  const db = getDb()
-  await db`
-    INSERT INTO tools (owner, name, description, repo_url, subdir, updated_at)
-    VALUES (${repoOwner}, ${toolName}, ${meta.description}, ${meta.repoUrl}, ${subdir ?? null}, now())
-    ON CONFLICT (owner, name) DO UPDATE
-      SET description = EXCLUDED.description,
-          repo_url    = EXCLUDED.repo_url,
-          subdir      = EXCLUDED.subdir,
-          updated_at  = now()
-  `
+  try {
+    await upsertTool({
+      owner: repoOwner,
+      name: toolName,
+      description: meta.description,
+      repo_url: meta.repoUrl,
+      subdir: subdir ?? null,
+      tags: [],
+    })
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : ''
+    if (msg === 'conflict') {
+      return NextResponse.json({ error: 'concurrent publish detected, please retry' }, { status: 409 })
+    }
+    return NextResponse.json({ error: 'failed to save tool' }, { status: 502 })
+  }
 
   return NextResponse.json({
     ok: true,

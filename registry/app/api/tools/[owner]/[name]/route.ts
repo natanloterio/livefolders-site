@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getDb } from '@/lib/db'
+import { findTool } from '@/lib/store'
 import { readLimiter, checkRateLimit } from '@/lib/ratelimit'
 
 function getIp(req: Request): string {
@@ -20,8 +20,7 @@ export async function GET(
   }
 
   const { owner, name } = await params
-  const db = getDb()
-  const rows = await db`SELECT * FROM tools WHERE owner = ${owner} AND name = ${name}`
-  if (rows.length === 0) return NextResponse.json({ error: 'tool not found' }, { status: 404 })
-  return NextResponse.json(rows[0])
+  const tool = await findTool(owner, name)
+  if (!tool) return NextResponse.json({ error: 'tool not found' }, { status: 404 })
+  return NextResponse.json(tool)
 }

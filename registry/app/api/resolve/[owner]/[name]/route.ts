@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getDb } from '@/lib/db'
+import { findTool } from '@/lib/store'
 import { readLimiter, checkRateLimit } from '@/lib/ratelimit'
 
 function getIp(req: Request): string {
@@ -37,22 +37,15 @@ export async function GET(
   const url = new URL(req.url)
   const version = url.searchParams.get('version')
 
-  const db = getDb()
-  const rows = await db`
-    SELECT repo_url, subdir FROM tools WHERE owner = ${owner} AND name = ${name}
-  `
-  if (rows.length === 0) {
-    return NextResponse.json({ error: 'tool not found' }, { status: 404 })
-  }
+  const tool = await findTool(owner, name)
+  if (!tool) return NextResponse.json({ error: 'tool not found' }, { status: 404 })
 
-  const repoUrl: string = rows[0].repo_url
-  const subdir: string | null = rows[0].subdir ?? null
-  const ghPath = repoUrl.replace('https://github.com/', '')
+  const ghPath = tool.repo_url.replace('https://github.com/', '')
+  const [ghOwner, ghRepo] = ghPath.split('/')
 
   let tag = version
   if (!tag) {
-    const [ghOwner, ghRepo] = ghPath.split('/')
-    tag = await getLatestTag(ghOwner, ghRepo, subdir ?? undefined)
+    tag = await getLatestTag(ghOwner, ghRepo, tool.subdir ?? undefined)
     if (!tag) {
       return NextResponse.json({ error: 'no versions (git tags) found for this tool' }, { status: 404 })
     }
@@ -60,6 +53,6 @@ export async function GET(
 
   const tarball_url = `https://github.com/${ghPath}/archive/${tag}.tar.gz`
   const response: Record<string, string> = { owner, name, version: tag, tarball_url }
-  if (subdir) response.subdir = subdir
+  if (tool.subdir) response.subdir = tool.subdir
   return NextResponse.json(response)
 }

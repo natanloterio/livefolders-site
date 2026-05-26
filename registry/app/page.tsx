@@ -1,29 +1,8 @@
-import { getDb } from '@/lib/db'
+import { getRecentTools, getMostDownloaded, searchTools } from '@/lib/store'
 import { ToolRow, ToolSummary } from '@/components/ToolRow'
 import './globals.css'
 
 export const revalidate = 60
-
-async function getRecentTools(): Promise<ToolSummary[]> {
-  const db = getDb()
-  return db`SELECT owner, name, description, downloads FROM tools ORDER BY created_at DESC LIMIT 10` as unknown as Promise<ToolSummary[]>
-}
-
-async function getMostDownloaded(): Promise<ToolSummary[]> {
-  const db = getDb()
-  return db`SELECT owner, name, description, downloads FROM tools ORDER BY downloads DESC LIMIT 10` as unknown as Promise<ToolSummary[]>
-}
-
-async function searchTools(q: string): Promise<ToolSummary[]> {
-  const db = getDb()
-  return db`
-    SELECT owner, name, description, downloads FROM tools
-    WHERE to_tsvector('english',
-        coalesce(name,'') || ' ' || coalesce(description,'') || ' ' || array_to_string(tags,' ')
-      ) @@ plainto_tsquery('english', ${q})
-    ORDER BY downloads DESC LIMIT 20
-  ` as unknown as Promise<ToolSummary[]>
-}
 
 export default async function Home({
   searchParams,
@@ -66,7 +45,7 @@ export default async function Home({
           {results.length === 0 ? <p>No tools found.</p> : (
             <table>
               <thead><tr><th>Tool</th><th>Description</th><th>Downloads</th></tr></thead>
-              <tbody>{results.map(t => <ToolRow key={`${t.owner}/${t.name}`} tool={t} />)}</tbody>
+              <tbody>{(results as ToolSummary[]).map(t => <ToolRow key={`${t.owner}/${t.name}`} tool={t} />)}</tbody>
             </table>
           )}
         </>
@@ -75,13 +54,13 @@ export default async function Home({
           <h2>Most Downloaded</h2>
           <table>
             <thead><tr><th>Tool</th><th>Description</th><th>Downloads</th></tr></thead>
-            <tbody>{popular.map(t => <ToolRow key={`${t.owner}/${t.name}`} tool={t} />)}</tbody>
+            <tbody>{(popular as ToolSummary[]).map(t => <ToolRow key={`${t.owner}/${t.name}`} tool={t} />)}</tbody>
           </table>
 
           <h2>Recently Published</h2>
           <table>
             <thead><tr><th>Tool</th><th>Description</th><th>Downloads</th></tr></thead>
-            <tbody>{recent.map(t => <ToolRow key={`${t.owner}/${t.name}`} tool={t} />)}</tbody>
+            <tbody>{(recent as ToolSummary[]).map(t => <ToolRow key={`${t.owner}/${t.name}`} tool={t} />)}</tbody>
           </table>
         </>
       )}

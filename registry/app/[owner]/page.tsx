@@ -1,17 +1,8 @@
 import { notFound } from 'next/navigation'
-import { getDb } from '@/lib/db'
+import { getOwnerTools } from '@/lib/store'
 import { ToolRow, ToolSummary } from '@/components/ToolRow'
 
 export const revalidate = 60
-
-async function getOwnerTools(owner: string): Promise<ToolSummary[]> {
-  const db = getDb()
-  return db`
-    SELECT owner, name, description, downloads FROM tools
-    WHERE owner = ${owner}
-    ORDER BY downloads DESC
-  ` as unknown as Promise<ToolSummary[]>
-}
 
 export default async function OwnerPage({
   params,
@@ -33,7 +24,7 @@ export default async function OwnerPage({
 
       <table>
         <thead><tr><th>Tool</th><th>Description</th><th>Downloads</th></tr></thead>
-        <tbody>{tools.map(t => <ToolRow key={t.name} tool={t} />)}</tbody>
+        <tbody>{(tools as ToolSummary[]).map(t => <ToolRow key={t.name} tool={t} />)}</tbody>
       </table>
 
       <hr />

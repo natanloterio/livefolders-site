@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getDb } from '@/lib/db'
+import { searchTools } from '@/lib/store'
 import { searchLimiter, checkRateLimit } from '@/lib/ratelimit'
 
 function getIp(req: Request): string {
@@ -28,15 +28,6 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'q parameter is required' }, { status: 400, headers: CORS })
   }
 
-  const db = getDb()
-  const results = await db`
-    SELECT owner, name, description, downloads, updated_at
-    FROM tools
-    WHERE to_tsvector('english',
-        coalesce(name,'') || ' ' || coalesce(description,'') || ' ' || array_to_string(tags,' ')
-      ) @@ plainto_tsquery('english', ${q})
-    ORDER BY downloads DESC
-    LIMIT 20
-  `
+  const results = await searchTools(q.trim())
   return NextResponse.json(results, { headers: CORS })
 }
